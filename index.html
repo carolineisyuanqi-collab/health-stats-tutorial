@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthData Insights | 医疗卫生数据分析门户</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'sans-serif'] },
+                    colors: {
+                        'apple-blue': '#0066cc',
+                        'apple-bg': '#f5f5f7',
+                        'apple-card': '#ffffff',
+                        'apple-text': '#1d1d1f',
+                        'apple-gray': '#86868b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased; }
+        .glass-nav {
+            background: rgba(245, 245, 247, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.006);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .glass-card:hover {
+            background: #ffffff;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+            transform: translateY(-5px);
+        }
+        pre { scrollbar-width: thin; scrollbar-color: #0066cc #f5f5f7; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="healthApp()" class="selection:bg-blue-100 selection:text-apple-blue">
+
+    <nav class="fixed top-0 w-full z-50 glass-nav h-16 flex items-center justify-between px-6 lg:px-20">
+        <div class="flex items-center gap-10">
+            <div class="text-xl font-bold tracking-tight text-apple-text cursor-pointer" @click="currentTab = 1">
+                HealthData <span class="text-apple-blue">Insights</span>
+            </div>
+            <div class="hidden xl:flex gap-6 text-[11px] uppercase font-bold tracking-widest text-apple-gray">
+    <button @click="currentTab = 1" :class="currentTab === 1 ? 'text-apple-text border-b-2 border-apple-blue pb-1' : 'hover:text-apple-text transition'">研究动态</button>
+    <button @click="currentTab = 2" :class="currentTab === 2 ? 'text-apple-text border-b-2 border-apple-blue pb-1' : 'hover:text-apple-text transition'">数据导入</button>
+    <button @click="currentTab = 3" :class="currentTab === 3 ? 'text-apple-text border-b-2 border-apple-blue pb-1' : 'hover:text-apple-text transition'">代码引擎</button>
+    
+    <a href="add0.html" class="hover:text-apple-text transition flex items-center">统计学基础chapter1</a>
+    <a href="add1.html" class="hover:text-apple-text transition flex items-center">chapter2</a>
+    <a href="add2.html" class="hover:text-apple-text transition flex items-center">chapter3</a>
+    <a href="add3.html" class="hover:text-apple-text transition flex items-center">chapter4</a>
+    <a href="add4.html" class="hover:text-apple-text transition flex items-center">chapter5</a>
+    <a href="add5.html" class="hover:text-apple-text transition flex items-center">chapter6</a>
+    <a href="add6.html" class="hover:text-apple-text transition flex items-center">chapter7</a>
+    <a href="add777.html" class="hover:text-apple-text transition flex items-center">chapter8</a>
+
+    <span class="w-px h-4 bg-black/10 mx-2"></span>
+</div>
+                
+            </div>
+        </div>
+        <div class="text-[9px] text-apple-gray font-mono tracking-widest border border-black/10 rounded-full px-4 py-1 uppercase">
+            Analysis Edition 2026
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+
+        <template x-if="currentTab === 1">
+            <div x-transition class="space-y-16">
+                <div class="text-center">
+                    <h1 class="text-7xl font-bold tracking-tighter mb-6 text-apple-text">医疗数据分析</h1>
+                    <p class="text-xl text-apple-gray font-light">整合 GBD 与 CHARLS 数据，驱动科学决策。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <template x-for="news in researchNews">
+                        <a :href="news.url" target="_blank" class="glass-card p-10 flex flex-col justify-between h-[340px] group">
+                            <div>
+                                <span class="text-apple-blue text-xs font-bold uppercase tracking-widest" x-text="news.tag"></span>
+                                <h3 class="text-3xl font-semibold mt-4 text-apple-text leading-tight group-hover:text-apple-blue transition-colors" x-text="news.title"></h3>
+                                <p class="text-apple-gray mt-4 text-sm font-light leading-relaxed" x-text="news.desc"></p>
+                            </div>
+                            <div class="flex items-center text-sm font-medium text-apple-blue transition-all">了解更多 <span class="ml-2 transform group-hover:translate-x-2 transition-transform">→</span></div>
+                        </a>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <template x-if="currentTab === 2">
+            <div x-transition class="max-w-2xl mx-auto text-center space-y-12">
+                <h2 class="text-4xl font-bold text-apple-text">导入医学数据集</h2>
+                <div class="glass-card p-20 border-2 border-dashed border-gray-200 hover:border-apple-blue/50 cursor-pointer group" @click="$refs.fileInput.click()">
+                    <input type="file" x-ref="fileInput" class="hidden" accept=".csv" @change="handleUpload">
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-10 h-10 text-apple-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        </div>
+                        <p class="text-lg font-medium text-apple-text" x-text="fileName || '点击或拖拽 CSV 文件'"></p>
+                    </div>
+                </div>
+                <div x-show="isUploading" class="space-y-4">
+                    <div class="w-full bg-gray-200 h-1 rounded-full overflow-hidden"><div class="bg-apple-blue h-full transition-all duration-1000" :style="`width: ${uploadProgress}%`"></div></div>
+                    <p class="text-[10px] font-mono text-apple-gray tracking-widest uppercase" x-text="uploadStatus"></p>
+                </div>
+                <button x-show="uploadComplete" @click="currentTab = 3" class="bg-apple-text text-white px-10 py-4 rounded-full font-semibold hover:bg-black transition-all transform hover:scale-105 shadow-xl">生成 R 分析代码</button>
+            </div>
+        </template>
+
+        <template x-if="currentTab === 3">
+            <div x-transition class="space-y-8">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h2 class="text-4xl font-bold text-apple-text">流行病学分析脚本</h2>
+                    </div>
+                    <div class="flex gap-4">
+                        <button @click="outputGeneratedCode()" class="bg-apple-text text-white px-6 py-2 rounded-full text-[13px] font-semibold hover:bg-black transition">输出代码</button>
+                        <button @click="copyCode" class="bg-gray-200 text-apple-text px-6 py-2 rounded-full text-[13px] font-medium hover:bg-gray-300">复制代码</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+                    <pre x-text="aiCode" class="font-mono text-sm leading-relaxed text-blue-700 overflow-x-auto whitespace-pre min-h-[400px]"></pre>
+                    <div x-show="!aiCode" class="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-300 italic">等待输出...</div>
+                </div>
+            </div>
+        </template>
+
+     
+
+        
+
+    </main>
+
+    <footer class="border-t border-black/5 py-12 text-center text-[10px] text-apple-gray uppercase tracking-widest">
+        &copy; 2026 HealthData Insights | Medical Research Standards [cite: 1, 2, 3]
+    </footer>
+
+    <script>
+        function healthApp() {
+            return {
+                currentTab: 1,
+                fileName: '',
+                isUploading: false,
+                uploadProgress: 0,
+                uploadStatus: '',
+                uploadComplete: false,
+                aiCode: '',
+                
+                researchNews: [
+                    { tag: 'GBD 2021 Update', title: '全球心血管疾病负担趋势报告', desc: '基于 GBD 2021 数据，揭示了全球范围内危险因素的动态演变规律 。', url: 'https://www.healthdata.org/gbd' },
+                    { tag: 'CHARLS 专题', title: '中国中老年人慢性病共病研究', desc: '利用 CHARLS 追踪数据，探讨了多种慢性病对健康期望寿命的综合影响 。', url: 'https://charls.pku.edu.cn/' }
+                ],
+
+                handleUpload(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.fileName = file.name;
+                        this.isUploading = true;
+                        this.uploadComplete = false;
+                        this.aiCode = '';
+                        const steps = ['扫描 CSV 结构...', '解析流行病学字段...', '加载 DALY 计算模型...', 'Ready.'];
+                        let i = 0;
+                        const timer = setInterval(() => {
+                            this.uploadProgress += 25;
+                            this.uploadStatus = steps[i++];
+                            if (this.uploadProgress >= 100) {
+                                clearInterval(timer);
+                                setTimeout(() => { this.isUploading = false; this.uploadComplete = true; }, 500);
+                            }
+                        }, 600);
+                    }
+                },
+
+                outputGeneratedCode() {
+                    if (!this.fileName) return alert('请先上传数据');
+                    this.aiCode = `# ---------------------------------------------------------
+# HealthData Insights Analysis Engine
+# 脚本生成时间: ${new Date().toLocaleDateString()}
+# 数据源: ${this.fileName}
+# ---------------------------------------------------------
+
+library(tidyverse)
+library(psych)  # 用于高级描述性统计
+
+# 1. 加载数据集
+raw_data <- read.csv("uploaded_data.csv")
+
+# =========================================================
+# 2. 第一阶段：描述性统计分析 (Descriptive Statistics)
+# =========================================================
+
+# 计算主要变量（如：Age, Cases, Deaths）的集中趋势与离散程度
+descriptive_summary <- raw_data %>%
+  select_if(is.numeric) %>%
+  summarise(across(everything(), list(
+    mean   = ~mean(. , na.rm = TRUE),      # 均值
+    sd     = ~sd(. , na.rm = TRUE),        # 标准差
+    median = ~median(. , na.rm = TRUE),    # 中位数
+    q1     = ~quantile(. , 0.25, na.rm = TRUE), # 第25分位数
+    q3     = ~quantile(. , 0.75, na.rm = TRUE)  # 第75分位数
+  )))
+
+print("--- 描述性统计摘要 ---")
+print(descriptive_summary)
+
+# =========================================================
+# 3. 第二阶段：核心负担指标计算 (GBD/CHARLS Methodology)
+# =========================================================
+
+process_burden_metrics <- function(df) {
+  df %>%
+    filter(!is.na(deaths) & !is.na(population)) %>%
+    mutate(
+      # 发病率与死亡率 (每10万人口)
+      incidence_rate = (new_cases / population) * 100000,
+      mortality_rate = (deaths / population) * 100000,
+      
+      # DALY = YLL (寿命损失) + YLD (伤残损失)
+      yll  = deaths * (standard_expectancy - age_at_death),
+      yld  = prevalence_cases * disability_weight,
+      daly = yll + yld
+    )
+}
+
+final_results <- process_burden_metrics(raw_data)
+
+# =========================================================
+# 4. 第三阶段：年龄标化率计算 (ASR)
+# =========================================================
+
+calculate_asr <- function(df, weights) {
+  # 利用标准人口权重进行标化
+  sum(df$incidence_rate * weights) / sum(weights)
+}
+
+print("--- 核心负担计算完成 ---")
+print(head(final_results))`;
+                },
+
+                copyCode() {
+                    if (!this.aiCode) return alert('请先输出代码');
+                    navigator.clipboard.writeText(this.aiCode).then(() => alert('分析脚本已复制到剪贴板！'));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

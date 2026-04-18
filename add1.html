@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biostats for Medical Students - 分类变量分析</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --line: #dbe3ee;
+      --primary: #1d4ed8;
+      --primary-soft: #e8f0ff;
+      --accent: #0f766e;
+      --warn: #92400e;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.8;
+    }
+    .container {
+      width: min(1100px, 92%);
+      margin: 40px auto 80px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 36px 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+    h1, h2, h3, h4 {
+      line-height: 1.35;
+      margin-top: 0;
+      color: #111827;
+    }
+    h1 { font-size: 2rem; margin-bottom: 12px; }
+    h2 {
+      font-size: 1.55rem;
+      margin: 36px 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--line);
+    }
+    h3 {
+      font-size: 1.2rem;
+      margin: 28px 0 12px;
+      color: var(--primary);
+    }
+    p { margin: 10px 0 14px; }
+    .lead {
+      font-size: 1.06rem;
+      color: var(--muted);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px 24px 18px;
+      box-shadow: var(--shadow);
+      margin: 20px 0;
+    }
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+    .toc ul { margin: 8px 0 0 22px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .box {
+      background: #fafcff;
+      border-left: 4px solid var(--primary);
+      padding: 14px 16px;
+      margin: 12px 0 18px;
+      border-radius: 10px;
+    }
+    .warning {
+      background: #fff8ef;
+      border-left-color: #d97706;
+    }
+    .example {
+      background: #f3fbf8;
+      border-left-color: var(--accent);
+    }
+    ul, ol { padding-left: 24px; }
+    li { margin: 6px 0; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .quiz-item {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+    .question {
+      font-weight: 600;
+      color: #111827;
+    }
+    .answer {
+      margin-top: 8px;
+      color: var(--muted);
+    }
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 18px;
+    }
+    @media (max-width: 720px) {
+      .hero, .card, .toc { padding: 20px 18px; }
+      h1 { font-size: 1.65rem; }
+      h2 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <span class="badge">Foundations · Section 4</span>
+      <h1>4. 分类变量分析</h1>
+      <p class="lead">
+        当研究问题关注的是“是否发病”“是否缓解”“是否阳性”这类分类结局时，
+        统计分析的重点不再是均值差异，而是不同类别的频数、比例和它们之间的关系。
+      </p>
+      <p>
+        这一节介绍医学研究中最常见的分类变量分析工具：
+        列联表、卡方检验、Fisher 精确检验和 McNemar 检验。
+      </p>
+    </section>
+
+    <section class="toc">
+      <h2 style="margin-top:0;border-bottom:none;padding-bottom:0;">本节目录</h2>
+      <ul>
+        <li><a href="#part-4-1">4.1 列联表基础</a></li>
+        <li><a href="#part-4-2">4.2 卡方检验</a></li>
+        <li><a href="#part-4-3">4.3 Fisher 精确检验</a></li>
+        <li><a href="#part-4-4">4.4 McNemar 检验</a></li>
+        <li><a href="#self-test">本节自测题</a></li>
+      </ul>
+    </section>
+
+    <section id="part-4-1" class="card">
+      <h2>4.1 列联表基础</h2>
+      <h3>严格定义</h3>
+      <p>
+        列联表（contingency table）用于展示两个或多个分类变量的联合分布。
+        最常见的是二维列联表：行表示一个分类变量，列表示另一个分类变量，
+        每个单元格记录某种组合下的频数，边缘总和称为边际频数。
+      </p>
+
+      <h3>通俗解释</h3>
+      <p>
+        列联表的作用，是把“两个分类变量是怎么交叉在一起的”一眼看清。
+        它是后面卡方检验、Fisher 精确检验和 McNemar 检验的出发点。
+      </p>
+
+      <div class="box example">
+        <strong>医学 toy example：</strong>
+        比较新药组和常规治疗组的肺炎缓解率。
+        行可以写“新药 / 常规”，列可以写“缓解 / 未缓解”，
+        表中每个格子填入对应人数。
+      </div>
+
+      <div class="box">
+        <strong>实用提示：</strong>
+        看列联表时先问：
+        <ul>
+          <li>数据是不是分类变量？</li>
+          <li>样本是独立的还是配对的？</li>
+          <li>是不是 2×2 表？</li>
+          <li>有没有格子人数特别小？</li>
+        </ul>
+      </div>
+
+      <h3>参考文献</h3>
+      <ol>
+        <li>Bewick V, et al. <em>Statistics review 8: Qualitative data – tests of association</em>.</li>
+        <li>Hazra A, Gogtay N. <em>Comparing Groups – Categorical Variables</em>.</li>
+      </ol>
+    </section>
+
+    <section id="part-4-2" class="card">
+      <h2>4.2 卡方检验</h2>
+      <h3>严格定义</h3>
+      <p>
+        Pearson 卡方检验（chi-square test）用于检验两个分类变量是否独立，
+        或不同独立组中分类结局的分布是否相同。
+        它比较观察频数与理论期望频数之间的差异。
+      </p>
+
+      <h3>通俗解释</h3>
+      <p>
+        卡方检验是在问：
+        “表里的分布差异，是否大到不像随机波动能解释？”
+      </p>
+
+      <div class="box example">
+        <strong>医学 toy example：</strong>
+        比较吸烟者和不吸烟者的术后并发症发生率是否不同。
+        如果每个格子人数都足够，这就是卡方检验的典型场景。
+      </div>
+
+      <div class="box warning">
+        <strong>常见误区：</strong>
+        <ul>
+          <li>格子太小还硬做卡方检验。</li>
+          <li>只报告 p 值，不报告各组比例和差异大小。</li>
+          <li>把“有统计学关联”直接说成“有因果关系”。</li>
+        </ul>
+      </div>
+
+      <h3>何时要小心</h3>
+      <p>
+        如果表格中某些格子的期望频数过低，卡方近似会变差。
+        尤其在 2×2 表、小样本、罕见事件研究中，要考虑 Fisher 精确检验。
+      </p>
+
+      <h3>参考文献</h3>
+      <ol>
+        <li>Swinscow & Campbell. <em>The Chi squared tests</em>.</li>
+        <li>Kim HY. <em>Chi-squared test and Fisher's exact test</em>.</li>
+      </ol>
+    </section>
+
+    <section id="part-4-3" class="card">
+      <h2>4.3 Fisher 精确检验</h2>
+      <h3>严格定义</h3>
+      <p>
+        Fisher 精确检验主要用于 2×2 列联表，尤其适用于样本量较小、
+        或某些单元格频数很低的情况。它基于精确概率计算，
+        因而不依赖卡方检验那样的近似。
+      </p>
+
+      <h3>通俗解释</h3>
+      <p>
+        当样本太少，小到“卡方检验的近似不够放心”时，
+        就优先想到 Fisher 精确检验。
+      </p>
+
+      <div class="box example">
+        <strong>医学 toy example：</strong>
+        某罕见病研究总样本只有 18 人，
+        比较两种治疗方案的不良反应发生率时，
+        如果表格中有格子计数为 0 或 1，
+        就很适合用 Fisher 精确检验。
+      </div>
+
+      <div class="box warning">
+        <strong>常见误区：</strong>
+        <ul>
+          <li>把 Fisher 精确检验当成“任何时候都更高级”的选择。</li>
+          <li>把配对二分类数据也拿来做 Fisher 检验。</li>
+        </ul>
+      </div>
+
+      <h3>参考文献</h3>
+      <ol>
+        <li>Kim HY. <em>Chi-squared test and Fisher’s exact test</em>.</li>
+        <li>Alhamhoom Y, et al. <em>Chi-square and Fisher’s exact tests</em>.</li>
+      </ol>
+    </section>
+
+    <section id="part-4-4" class="card">
+      <h2>4.4 McNemar 检验</h2>
+      <h3>严格定义</h3>
+      <p>
+        McNemar 检验用于分析配对的二分类数据，
+        典型情形是同一批对象前后各测一次，
+        或一一匹配的配对设计。它通常应用于 2×2 配对列联表，
+        检验两次相关测量的边际比例是否相同。
+      </p>
+
+      <h3>通俗解释</h3>
+      <p>
+        如果卡方检验比较的是“两群不同的人”，
+        那 McNemar 检验比较的是“同一个人前后是否发生了系统变化”。
+      </p>
+
+      <div class="box example">
+        <strong>医学 toy example：</strong>
+        对同一批患者比较干预前后的筛查阳性率。
+        由于每位患者都被测量了两次，数据是配对的，
+        因此应优先考虑 McNemar 检验。
+      </div>
+
+      <div class="box">
+        <strong>核心直觉：</strong>
+        McNemar 检验主要关注的是“不一致对”：
+        <ul>
+          <li>前阳后阴</li>
+          <li>前阴后阳</li>
+        </ul>
+        如果大多数人前后都没变，真正影响检验结果的主要就是这两个格子。
+      </div>
+
+      <div class="box warning">
+        <strong>常见误区：</strong>
+        <ul>
+          <li>把配对二分类数据误当成独立样本做卡方检验。</li>
+          <li>把 McNemar 检验误当成“一致性检验”；它检验的是边际比例差异，不等于一致性评价。</li>
+        </ul>
+      </div>
+
+      <h3>参考文献</h3>
+      <ol>
+        <li><em>The Chi squared tests</em>（BMJ Statistics at Square One）</li>
+        <li>Sundjaja JH, et al. <em>McNemar And Mann-Whitney U Tests</em>.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>本节最简记忆版</h2>
+      <ul>
+        <li><strong>列联表：</strong>先把两个分类变量交叉起来看。</li>
+        <li><strong>卡方检验：</strong>独立样本、分类变量、大样本时常用。</li>
+        <li><strong>Fisher 精确检验：</strong>2×2 表、小样本或格子稀疏时常用。</li>
+        <li><strong>McNemar 检验：</strong>配对二分类数据的首选方法之一。</li>
+      </ul>
+    </section>
+
+    <section id="self-test" class="card">
+      <h2>本节自测题（8 题）</h2>
+
+      <div class="quiz-item">
+        <p class="question">1. “治疗组/对照组” 与 “缓解/未缓解” 组成的 2×2 表，最基本属于什么工具？</p>
+        <p class="answer"><strong>答案：</strong>列联表。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">2. 卡方检验最常用于什么问题？</p>
+        <p class="answer"><strong>答案：</strong>比较两个分类变量是否独立，或不同独立组中分类结局分布是否相同。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">3. 如果 2×2 表中某个格子人数特别少，优先考虑什么方法？</p>
+        <p class="answer"><strong>答案：</strong>Fisher 精确检验。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">4. 同一批患者治疗前后“阳性/阴性”结果比较，最适合什么方法？</p>
+        <p class="answer"><strong>答案：</strong>McNemar 检验。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">5. McNemar 检验和普通卡方检验最大的区别是什么？</p>
+        <p class="answer"><strong>答案：</strong>McNemar 用于配对二分类数据；普通卡方检验通常用于独立样本。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">6. Fisher 精确检验是不是任何时候都比卡方检验更好？</p>
+        <p class="answer"><strong>答案：</strong>不是。它主要在小样本或稀疏 2×2 表时更有优势。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">7. 卡方检验显著，是否就能说明存在因果关系？</p>
+        <p class="answer"><strong>答案：</strong>不能。它只能说明统计学关联。</p>
+      </div>
+
+      <div class="quiz-item">
+        <p class="question">8. McNemar 检验是不是“一致性检验”？</p>
+        <p class="answer"><strong>答案：</strong>严格说不是。它检验的是边际比例是否不同。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>参考文献汇总</h2>
+      <ol>
+        <li>Bewick V, et al. Statistics review 8: Qualitative data – tests of association.</li>
+        <li>Hazra A, Gogtay N. Comparing Groups – Categorical Variables.</li>
+        <li>Swinscow & Campbell. The Chi squared tests.</li>
+        <li>Kim HY. Chi-squared test and Fisher’s exact test.</li>
+        <li>Alhamhoom Y, et al. Chi-square and Fisher’s exact tests.</li>
+        <li>Sundjaja JH, et al. McNemar And Mann-Whitney U Tests.</li>
+      </ol>
+      <p class="footer-note">
+        这份 HTML 延续了你前面页面的结构：正文、提示框、医学 toy example、自测题和参考文献。
+      </p>
+    </section>
+  </main>
+</body>
+</html>
+
+
+5:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5. 相关性分析</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+      background: #f7f9fc;
+      color: #1f2937;
+      line-height: 1.8;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .page-title {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+    .intro {
+      background: #ffffff;
+      border-left: 6px solid #3b82f6;
+      padding: 20px 24px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+      margin-bottom: 28px;
+    }
+    .section {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px 30px;
+      margin-bottom: 26px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    h1, h2, h3, h4 {
+      color: #0f172a;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    h3 {
+      font-size: 21px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      color: #1d4ed8;
+    }
+    p {
+      margin: 10px 0;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 14px 0;
+    }
+    .toy {
+      background: #fffaf0;
+      border: 1px solid #fde68a;
+    }
+    .warn {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+    }
+    .summary {
+      background: #f0fdf4;
+      border-left: 6px solid #22c55e;
+      padding: 18px 22px;
+      border-radius: 12px;
+    }
+    ul, ol {
+      padding-left: 22px;
+    }
+    li {
+      margin: 8px 0;
+    }
+    .refs li {
+      margin-bottom: 10px;
+    }
+    .footer-note {
+      margin-top: 28px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .quote {
+      font-style: italic;
+      color: #374151;
+      background: #f8fafc;
+      border-left: 4px solid #94a3b8;
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="page-title">5. 相关性分析</h1>
+
+    <div class="intro">
+      <p>在医学研究中，我们经常关心两个变量是否“同时变化”。例如：年龄越大，血压是否越高？BMI 越大，空腹血糖是否越高？肿瘤标志物水平越高，病灶负荷是否也越大？这类问题的第一步往往是做相关性分析。相关分析的核心任务是描述两个变量之间关系的方向和强度。</p>
+      <p><strong>但必须强调：</strong>相关分析描述的是“关联（association）”，不是“因果（causation）”。</p>
+    </div>
+
+    <section class="section">
+      <h2>5.1 Pearson 相关</h2>
+
+      <h3>严格定义</h3>
+      <p><strong>Pearson 相关系数（Pearson correlation coefficient）</strong>通常记作 <code>r</code>，用于衡量两个连续变量之间<strong>线性关系</strong>的方向和强度。它的取值范围为 −1 到 +1：</p>
+      <ul>
+        <li><code>r = +1</code>：完全正线性相关</li>
+        <li><code>r = -1</code>：完全负线性相关</li>
+        <li><code>r = 0</code>：没有线性相关</li>
+      </ul>
+      <p>这里要特别注意：<code>r = 0</code> 只表示“没有线性关系”，不代表两个变量之间完全没有其他形式的关系。</p>
+
+      <h3>通俗解释</h3>
+      <p>Pearson 相关可以理解为：看两列连续数字是否沿着一条斜线一起变化。</p>
+      <div class="quote">
+        当一个变量增大时，另一个变量是否也倾向于按“直线趋势”一起增大或减小？
+      </div>
+
+      <h3>什么时候用</h3>
+      <div class="box">
+        <ul>
+          <li>两个变量都是<strong>连续型变量</strong>；</li>
+          <li>研究者关心的是<strong>线性关系</strong>；</li>
+          <li>数据分布没有特别严重的偏态；</li>
+          <li>离群值不太严重；</li>
+          <li>散点图看起来大致呈现一条斜向带状分布。</li>
+        </ul>
+      </div>
+
+      <div class="box toy">
+        <h3>医学 toy example</h3>
+        <p>研究“BMI 与空腹血糖”之间是否相关，在 120 名体检者中测量两项指标。若散点图显示 BMI 越高，空腹血糖通常也越高，而且点分布大致沿一条向上的斜线，则适合做 Pearson 相关分析。</p>
+        <p>若结果为 <code>r = 0.58</code>，可以解释为：BMI 与空腹血糖存在<strong>中等偏强的正线性相关</strong>。</p>
+      </div>
+
+      <div class="box warn">
+        <strong>初学者注意：</strong>
+        <ul>
+          <li>Pearson 相关衡量的是线性关系，不是所有形式的关系。</li>
+          <li>它对离群值较敏感，少数极端点可能明显改变结果。</li>
+          <li>做 Pearson 相关前，最好先画散点图，而不是只看一个相关系数。</li>
+          <li>高相关不代表两个测量方法“一致”，一致性问题应另用其他方法分析。</li>
+        </ul>
+      </div>
+
+      <h3>推荐阅读</h3>
+      <ul class="refs">
+        <li>Schober P, Boer C, Schwarte LA. <em>Correlation Coefficients: Appropriate Use and Interpretation</em>. Anesthesia &amp; Analgesia, 2018.</li>
+        <li>Mukaka MM. <em>A guide to appropriate use of Correlation coefficient in medical research</em>. Malawi Medical Journal, 2012.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>5.2 Spearman 相关</h2>
+
+      <h3>严格定义</h3>
+      <p><strong>Spearman 等级相关系数（Spearman rank correlation coefficient）</strong>通常记作 <code>ρ</code> 或 <code>r<sub>s</sub></code>。它通过把原始数据转换为秩（rank），评估两个变量之间<strong>单调关系</strong>的方向和强度。</p>
+      <p>这里的“单调关系”是指：一个变量越大，另一个变量整体上也倾向于越大，或者整体上越小，但不要求这种关系一定是严格直线。</p>
+
+      <h3>通俗解释</h3>
+      <p>Spearman 更像是在看：</p>
+      <div class="quote">
+        排名靠前的人，在另一个指标里是不是也大多排名靠前？
+      </div>
+      <p>所以它更关注“排序趋势是否一致”，而不是“点是否排成一条直线”。</p>
+
+      <h3>什么时候用</h3>
+      <div class="box">
+        <ul>
+          <li>至少有一个变量是<strong>等级变量/有序变量</strong>；</li>
+          <li>连续变量分布明显偏态；</li>
+          <li>数据中存在一定离群值；</li>
+          <li>变量关系看起来总体单调，但不一定线性。</li>
+        </ul>
+      </div>
+
+      <div class="box toy">
+        <h3>医学 toy example</h3>
+        <p>研究“疼痛评分（0–10 分）与睡眠质量分级”之间的关系。疼痛评分和睡眠质量都带有明显的等级信息，这时 Spearman 相关通常比 Pearson 更自然。</p>
+        <p>若结果为 <code>r<sub>s</sub> = 0.64</code>，可以解释为：疼痛越重的患者，睡眠越差的趋势较明显，属于<strong>中等偏强的正单调相关</strong>。</p>
+      </div>
+
+      <div class="box">
+        <strong>Pearson 与 Spearman 的直观区别：</strong>
+        <ul>
+          <li><strong>Pearson</strong>：更适合连续变量、线性关系。</li>
+          <li><strong>Spearman</strong>：更适合等级变量、偏态数据、单调关系。</li>
+        </ul>
+      </div>
+
+      <div class="box warn">
+        <strong>常见误区：</strong>
+        <ul>
+          <li>Spearman 不是“不会做 Pearson 时的次选方法”。</li>
+          <li>它比 Pearson 对异常值更稳，但不是完全不受影响。</li>
+          <li>Spearman 相关高，也不等于两个工具可以互相替代。</li>
+        </ul>
+      </div>
+
+      <h3>推荐阅读</h3>
+      <ul class="refs">
+        <li>Mukaka MM. <em>A guide to appropriate use of Correlation coefficient in medical research</em>. Malawi Medical Journal, 2012.</li>
+        <li>Fletcher J. <em>Correlation</em>. BMJ, 2009.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>5.3 相关系数的解释</h2>
+
+      <h3>严格定义</h3>
+      <p>无论是 Pearson 的 <code>r</code>，还是 Spearman 的 <code>r<sub>s</sub></code> / <code>ρ</code>，它们都在 <code>-1</code> 到 <code>+1</code> 之间：</p>
+      <ul>
+        <li><strong>正号</strong>：正相关，一个变量增大时另一个变量也倾向增大；</li>
+        <li><strong>负号</strong>：负相关，一个变量增大时另一个变量倾向减小；</li>
+        <li><strong>绝对值越大</strong>：相关越强；</li>
+        <li><strong>越接近 0</strong>：相关越弱。</li>
+      </ul>
+
+      <h3>通俗解释</h3>
+      <p>解释相关系数时，可以同时看两个方面：</p>
+      <ol>
+        <li><strong>方向</strong>：同向变化还是反向变化；</li>
+        <li><strong>强度</strong>：这种共同变化紧不紧密。</li>
+      </ol>
+
+      <div class="box">
+        <strong>常见经验性分级（仅作教学参考）：</strong>
+        <ul>
+          <li>0.00–0.30：很弱或可忽略相关</li>
+          <li>0.30–0.50：低度相关</li>
+          <li>0.50–0.70：中度相关</li>
+          <li>0.70–0.90：高度相关</li>
+          <li>0.90–1.00：很高或极强相关</li>
+        </ul>
+        <p>负相关时同样看绝对值来判断强弱。</p>
+      </div>
+
+      <div class="box toy">
+        <h3>医学 toy example</h3>
+        <p>若研究“血清 CRP 与住院天数”的关系，结果为 <code>r = 0.26</code>，可解释为：两者存在<strong>较弱的正相关</strong>。</p>
+        <p>若结果为 <code>r = 0.74</code>，可解释为：两者存在<strong>较强的正相关</strong>。</p>
+        <p>但无论是哪种情况，都不能直接说“CRP 决定了住院天数”。</p>
+      </div>
+
+      <div class="box">
+        <strong>论文写作时更规范的表达：</strong>
+        <ul>
+          <li>X 与 Y 呈正相关（Pearson <code>r = 0.48</code>, <code>p &lt; 0.001</code>）</li>
+          <li>X 与 Y 呈中等程度负相关（Spearman <code>r<sub>s</sub> = -0.52</code>, <code>p = 0.004</code>）</li>
+          <li>X 与 Y 未见明显线性相关（Pearson <code>r = 0.09</code>, <code>p = 0.31</code>）</li>
+        </ul>
+      </div>
+
+      <div class="box warn">
+        <strong>初学者最该记住的两点：</strong>
+        <ul>
+          <li><strong>统计学显著</strong>不等于<strong>相关很强</strong>。</li>
+          <li><strong>相关很强</strong>也不一定有明确的临床意义。</li>
+        </ul>
+      </div>
+
+      <h3>推荐阅读</h3>
+      <ul class="refs">
+        <li>Schober P, Boer C, Schwarte LA. <em>Correlation Coefficients: Appropriate Use and Interpretation</em>. Anesthesia &amp; Analgesia, 2018.</li>
+        <li>Akoglu H. <em>User's guide to correlation coefficients</em>. Turkish Journal of Emergency Medicine, 2018.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>5.4 相关不等于因果</h2>
+
+      <h3>严格定义</h3>
+      <p>“相关不等于因果”是指：即使两个变量在统计上呈现明显相关，也不能仅凭这一点就认定一个变量导致了另一个变量。相关分析只说明变量之间存在<strong>统计关联</strong>，并不能自动区分：</p>
+      <ul>
+        <li>X 导致 Y；</li>
+        <li>Y 导致 X；</li>
+        <li>第三个变量同时影响 X 和 Y；</li>
+        <li>观察到的相关仅仅来自偏倚或样本结构。</li>
+      </ul>
+
+      <h3>通俗解释</h3>
+      <div class="quote">
+        两件事经常一起出现，不代表其中一件事就是另一件事的原因。
+      </div>
+
+      <p>例如，炎症指标高和住院时间长可能相关，但这并不说明“炎症指标本身单独导致住院更久”；也可能是病情重这一共同因素同时导致两者增加。</p>
+
+      <h3>医学里为什么尤其要警惕</h3>
+      <p>因为大多数医学数据来自真实世界，而不是完全受控的实验环境。年龄、性别、疾病严重程度、合并症、治疗方案、生活方式等，都可能成为混杂因素，使两个变量表面上看起来相关。</p>
+
+      <div class="box toy">
+        <h3>医学 toy example</h3>
+        <p>一项横断面研究发现：“每天喝咖啡杯数”与“心率”呈正相关。</p>
+        <p>这时不能立刻说“咖啡导致心率升高”。更严谨的思路是：</p>
+        <ul>
+          <li>也许喝咖啡多的人压力更大；</li>
+          <li>也许他们睡眠更差；</li>
+          <li>也许他们吸烟比例更高；</li>
+          <li>也许某些基础疾病同时影响了咖啡摄入和心率。</li>
+        </ul>
+        <p>所以，相关结果通常只是提出假设的起点，而不是因果结论的终点。</p>
+      </div>
+
+      <div class="box">
+        <strong>相关分析的价值仍然很大：</strong>
+        <ul>
+          <li>可作为探索性分析，帮助发现潜在关系；</li>
+          <li>可作为后续回归建模的前奏；</li>
+          <li>可帮助研究者快速把握变量间的大致关联方向与强度。</li>
+        </ul>
+      </div>
+
+      <div class="box warn">
+        <strong>写作时建议先问自己四个问题：</strong>
+        <ol>
+          <li>这两个变量的时间顺序清楚吗？</li>
+          <li>会不会有共同原因同时影响它们？</li>
+          <li>会不会存在反向因果？</li>
+          <li>当前研究设计足以支持因果推断吗？</li>
+        </ol>
+      </div>
+
+      <h3>推荐阅读</h3>
+      <ul class="refs">
+        <li>Igelström E, et al. <em>Causal inference and effect estimation using observational data</em>. Journal of Epidemiology &amp; Community Health, 2022.</li>
+        <li>Howick J, Glasziou P, Aronson JK. <em>The evolution of evidence hierarchies: what can Bradford Hill's guidelines for causation contribute?</em> Journal of the Royal Society of Medicine, 2009.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>本节小结</h2>
+      <div class="summary">
+        <p><strong>本节最核心的四句话：</strong></p>
+        <ul>
+          <li>Pearson 相关看的是连续变量之间的<strong>线性关系</strong>。</li>
+          <li>Spearman 相关看的是等级或偏态数据之间的<strong>单调关系</strong>。</li>
+          <li>相关系数要同时看<strong>方向、强度和图形</strong>，不能只看 p 值。</li>
+          <li>任何相关结果都不能自动解释为<strong>因果关系</strong>。</li>
+        </ul>
+        <p>对医学生来说，一个非常实用的思路是：先看变量类型，再看散点图，再决定 Pearson 还是 Spearman，最后在解释时始终提醒自己：<strong>这是 association，不是 causation。</strong></p>
+      </div>
+    </section>
+
+    <p class="footer-note">注：本页为医学生初学者导向版本，强调“定义—理解—案例—误区—延伸阅读”的结构，适合作为课程讲义、小网页或自学材料。</p>
+  </div>
+</body>
+</html>

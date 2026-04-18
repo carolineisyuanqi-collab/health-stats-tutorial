@@ -1,0 +1,2544 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>11. 纵向数据与重复测量</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>11. 纵向数据与重复测量</h1>
+
+  <h2>11.1 重复测量数据的特点</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    重复测量数据（repeated measures data）是指对同一个研究对象在多个时间点或多个条件下反复测得的结局变量所形成的数据。
+    如果这些测量主要沿时间顺序展开，尤其是在随访研究、队列研究或临床试验中反复记录同一受试者的结局，
+    则通常也属于纵向数据（longitudinal data）的范畴。重复测量可以看作纵向数据的一种典型形式。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    最关键的一点是：这些数据不是彼此独立的。因为“今天测的这个血压”和“下个月测的这个血压”都来自同一个患者，
+    所以它们往往会比两个陌生患者之间的血压更相似。
+  </p>
+
+  <h3>常见特征</h3>
+  <ul>
+    <li>同一个体被重复观察，例如 0、4、8、12 周测量一次 HbA1c；</li>
+    <li>观测值之间存在相关性；</li>
+    <li>时间信息重要，不仅关心差异，也关心变化趋势；</li>
+    <li>容易出现缺失值，如失访、漏访、提前停药；</li>
+    <li>数据常常不平衡，即不同患者随访次数不完全一致。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在一项降糖药试验中，研究者测量 100 名 2 型糖尿病患者在基线、4 周、12 周、24 周的 HbA1c。
+    这里的结局变量是 HbA1c，重复测量单位是同一位患者，时间因素是 4 个随访时点。
+    这就是典型的重复测量/纵向数据。
+  </div>
+
+  <div class="tip">
+    <strong>初学者提醒：</strong>
+    不能把每个时间点的数据都当成彼此独立，然后分别做普通 t 检验或普通线性回归。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Schober P, Vetter TR. Repeated Measures Designs and Analysis of Longitudinal Data. Anesth Analg. 2018.</li>
+    <li>da Silveira LTY, et al. Mixed-effects model: a useful statistical tool for longitudinal data analysis. Braz Oral Res. 2023.</li>
+  </ol>
+
+  <h2>11.2 个体内相关性</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    个体内相关性（within-subject correlation）是指同一受试者在不同时间点上的观测值之间存在统计相关。
+    若记第 i 个受试者在第 j 次测量的结果为 Y<sub>ij</sub>，则同一 i 下不同 j 的观测值通常不是独立的。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    同一个人的身体状况有“个人底色”。有的人基线血压就偏高，有的人不论在哪个时间点血糖都偏高一点。
+    所以同一个人的多次测量结果往往更接近彼此。
+  </p>
+
+  <h3>为什么重要</h3>
+  <ul>
+    <li>忽略个体内相关性会导致标准误估计错误；</li>
+    <li>显著性检验可能失真；</li>
+    <li>可能夸大研究结果的统计学意义。</li>
+  </ul>
+
+  <h3>相关结构的直观理解</h3>
+  <ul>
+    <li><strong>复合对称（CS）</strong>：同一人的任意两个时间点相关性差不多；</li>
+    <li><strong>AR(1)</strong>：时间越近，相关越强；</li>
+    <li><strong>非结构化（UN）</strong>：不预设固定模式，让数据自己决定不同时间点的相关结构。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某高血压患者三次随访收缩压分别为 148、146、150 mmHg；
+    另一位患者分别为 126、128、125 mmHg。
+    显然，同一患者内部的三次结果更相似，这就是个体内相关性。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Schober P, Vetter TR. 2018.</li>
+    <li>Wang X, et al. Introduction to linear mixed-effects models in repeated measures. 2022.</li>
+  </ol>
+
+  <h2>11.3 混合效应模型</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    混合效应模型（mixed-effects model）是同时包含固定效应（fixed effects）和随机效应（random effects）的一类回归模型。
+    固定效应用于描述总体平均规律，随机效应用于描述个体、中心、医生等聚类单位之间的随机差异。
+  </p>
+
+  <div class="box">
+    <strong>典型线性混合模型：</strong><br>
+    Y<sub>ij</sub> = β<sub>0</sub> + β<sub>1</sub>time<sub>ij</sub> + β<sub>2</sub>group<sub>i</sub> + β<sub>3</sub>(time × group)<sub>ij</sub> + b<sub>0i</sub> + ε<sub>ij</sub>
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    固定效应回答“总体上治疗有没有效果”，随机效应回答“不同患者本身起点不一样，变化速度也可能不一样”。
+  </p>
+
+  <h3>常见随机效应</h3>
+  <ul>
+    <li>随机截距模型：允许每个患者有不同基线；</li>
+    <li>随机斜率模型：允许每个患者变化速度不同；</li>
+    <li>随机截距 + 随机斜率模型：更灵活，但更复杂。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在骨密度研究中，患者于基线、6 个月、12 个月各测一次骨密度。
+    固定效应可包括治疗组、时间、组别×时间；随机效应可包括患者随机截距。
+  </div>
+
+  <h3>优点</h3>
+  <ul>
+    <li>处理个体内相关性；</li>
+    <li>适用于不平衡随访数据；</li>
+    <li>可以纳入时间效应、治疗效应和交互作用；</li>
+    <li>更贴近真实临床数据结构。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>da Silveira LTY, et al. 2023.</li>
+    <li>Wang X, et al. 2022.</li>
+  </ol>
+
+  <h2>11.4 重复测量混合模型 MMRM</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    MMRM（mixed model for repeated measures）通常用于连续型纵向结局分析。
+    它常将时间点视为分类变量，把治疗、时间、治疗×时间、基线值等作为固定效应，
+    并通过受试者内协方差结构来刻画重复测量之间的相关性。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    MMRM 更关注“每个随访时点两组平均值分别是多少、差多少”，而不是强行要求所有人的变化趋势都服从同一条直线。
+  </p>
+
+  <h3>为什么临床试验中常用</h3>
+  <ul>
+    <li>可以直接比较各随访时间点的组间差异；</li>
+    <li>比传统重复测量方差分析更灵活；</li>
+    <li>在缺失可近似视为 MAR 时，可利用所有已观测数据。</li>
+  </ul>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    MMRM 对缺失值机制有假设要求。若 MAR 假设不成立，则结果可能有偏，因此临床试验中通常还需要敏感性分析。
+  </div>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某抗抑郁药随机对照试验中，HAMD 评分在基线、2 周、4 周、6 周测量。
+    研究者希望比较第 6 周两组差异，并考察两组随时间变化的模式是否不同，这时可采用 MMRM。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Ashbeck EL, Bell ML. 2016.</li>
+    <li>Pugh SL, et al. Missing repeated measures data in clinical trials. 2021.</li>
+  </ol>
+
+  <h2>11.5 聚类数据与多中心研究</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    聚类数据（clustered data）是指观察单位被自然分组到某些簇中，同一簇内观测值可能更相似。
+    多中心研究（multicenter study）则是指同一研究在多个中心开展，因此患者不仅可能有个体内重复测量相关，
+    还可能存在同中心患者间的聚类相关。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    来自同一家医院的患者，可能因为医生习惯、设备、诊疗流程、病人来源相似，而比来自不同医院的患者更像。
+    这就是中心效应或聚类效应。
+  </p>
+
+  <h3>ICC 的概念</h3>
+  <p>
+    ICC（组内相关系数）用于描述同一簇内个体的相似程度。ICC 越大，说明同一中心内患者越相似，
+    实际可提供的独立信息就越少。
+  </p>
+
+  <h3>为什么更复杂</h3>
+  <ul>
+    <li>同一患者不同时间点之间相关；</li>
+    <li>同一中心不同患者之间也可能相关；</li>
+    <li>因此常需考虑层级结构：时间点嵌套于患者，患者嵌套于中心。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    一个肿瘤研究在 15 家医院进行，每位患者在基线、3 月、6 月、12 月测量生活质量评分。
+    这时既有患者内重复测量相关，也可能有中心层面的聚类相关。
+  </div>
+
+  <h3>常见处理方式</h3>
+  <ul>
+    <li>在模型中加入中心固定效应；</li>
+    <li>把中心作为随机效应；</li>
+    <li>对于聚类随机试验，使用适合聚类结构的混合模型。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Wynants L, et al. Screening for data clustering in multicenter studies. 2013.</li>
+    <li>Islam S, et al. Accounting for center-level effects in multicenter randomized clinical trials. 2024.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      纵向数据与重复测量分析的核心在于：同一患者的多次观测不是独立的。
+      因此，医学研究中只要出现基线与随访、多次测量、多中心等设计，就应优先考虑相关性与层级结构。
+    </p>
+    <p>
+      混合效应模型是处理这类数据的核心工具。固定效应用于解释总体平均规律，随机效应用于刻画个体或中心差异。
+      MMRM 则是临床试验中分析连续型重复测量结局的常用方法，尤其适合比较不同随访时点的组间差异。
+    </p>
+    <p>
+      在多中心研究中，还需进一步考虑中心效应和 ICC。阅读医学论文时，一旦看到“同一患者反复测量”或“多中心”，
+      就要意识到不能把所有观测简单看成独立样本。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Schober P, Vetter TR. Repeated Measures Designs and Analysis of Longitudinal Data. Anesth Analg. 2018.</li>
+    <li>Muhammad LN, et al. Guidelines for repeated measures statistical analysis approaches with basic science data. 2023.</li>
+    <li>da Silveira LTY, et al. Mixed-effects model in longitudinal data analysis. 2023.</li>
+    <li>Wang X, et al. Introduction to linear mixed-effects models. 2022.</li>
+    <li>Cheng J, et al. Real Longitudinal Data Analysis for Real People. Stat Med. 2010.</li>
+    <li>Ashbeck EL, Bell ML. 2016.</li>
+    <li>Pugh SL, et al. Missing repeated measures data in clinical trials. 2021.</li>
+    <li>Bell ML, et al. MMRM for cluster randomized trials. 2020.</li>
+    <li>Wynants L, et al. Screening for data clustering in multicenter studies. 2013.</li>
+    <li>Islam S, et al. Accounting for center-level effects in multicenter randomized clinical trials. 2024.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>什么叫重复测量数据？它与一般横断面数据最本质的区别是什么？</li>
+    <li>为什么同一个患者在多个时间点的测量值通常不是独立的？</li>
+    <li>如果忽略个体内相关性，统计推断可能会出现什么问题？</li>
+    <li>固定效应和随机效应分别代表什么含义？</li>
+    <li>什么是随机截距模型？它在医学上通常对应哪种现实情况？</li>
+    <li>MMRM 与一般混合效应模型是什么关系？</li>
+    <li>为什么 MMRM 在临床试验中常用于分析连续型重复测量结局？</li>
+    <li>MMRM 对缺失值处理依赖哪类常见假设？</li>
+    <li>什么是 ICC？ICC 大说明了什么？</li>
+    <li>在多中心纵向研究中，至少可能存在哪两层相关性？</li>
+  </ol>
+
+</body>
+</html>
+
+12
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>12. 诊断试验与筛查研究</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>12. 诊断试验与筛查研究</h1>
+
+  <h2>12.1 敏感度与特异度</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    在诊断试验研究中，通常使用参考标准（reference standard）判断受试者是否真正患有目标疾病。
+    若将结果整理为四格表：
+    真阳性（TP）、假阳性（FP）、假阴性（FN）、真阴性（TN），则：
+  </p>
+  <div class="formula">
+    敏感度 Sensitivity = TP / (TP + FN)
+  </div>
+  <div class="formula">
+    特异度 Specificity = TN / (TN + FP)
+  </div>
+  <p>
+    敏感度表示在所有真正患病者中检测为阳性的比例；特异度表示在所有真正无病者中检测为阴性的比例。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    敏感度反映“把病人找出来”的能力，特异度反映“别把健康人误判成病人”的能力。
+    临床上通常认为：筛查阶段更重视敏感度，确诊阶段更重视特异度。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某乳腺癌筛查试验中，40 人真实患病，160 人真实无病。
+    检测结果为 TP=36，FN=4，FP=24，TN=136。
+    因此敏感度 = 36/40 = 90%，特异度 = 136/160 = 85%。
+  </div>
+
+  <div class="tip">
+    <strong>初学者提醒：</strong>
+    敏感度 95% 并不表示“阳性的人里 95% 真有病”。
+    这句话描述的是阳性预测值，不是敏感度。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Šimundić AM. Measures of Diagnostic Accuracy: Basic Definitions. EJIFCC. 2009.</li>
+    <li>Dhamnetiya D, et al. How to Analyze the Diagnostic Performance of a New Test? Cureus. 2021.</li>
+  </ol>
+
+  <h2>12.2 阳性预测值与阴性预测值</h2>
+
+  <h3>严格定义</h3>
+  <div class="formula">
+    阳性预测值 PPV = TP / (TP + FP)
+  </div>
+  <div class="formula">
+    阴性预测值 NPV = TN / (TN + FN)
+  </div>
+  <p>
+    PPV 表示检测阳性者中真正患病的比例；NPV 表示检测阴性者中真正无病的比例。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    PPV 和 NPV 不是从“真实有没有病”出发，而是从“检测结果出来以后，这个结果有多可信”来理解。
+    PPV 回答“测阳性后多大概率真有病”，NPV 回答“测阴性后多大概率真没病”。
+  </p>
+
+  <h3>与患病率的关系</h3>
+  <p>
+    PPV 和 NPV 会受到患病率影响。患病率越低，PPV 往往越低；患病率越高，PPV 往往越高。
+    这也是筛查研究中阳性结果常常还需要进一步确诊的原因。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若前例中 TP=36，FP=24，TN=136，FN=4，
+    则 PPV = 36/(36+24)=60%，NPV = 136/(136+4)=97.1%。
+    说明阳性结果并不一定都是真正患病，但阴性结果通常较让人放心。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Šimundić AM. 2009.</li>
+    <li>Deeks JJ. Systematic reviews of evaluations of diagnostic and screening tests. BMJ. 2001.</li>
+  </ol>
+
+  <h2>12.3 ROC 曲线</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    ROC 曲线（receiver operating characteristic curve）是对连续型或等级型诊断指标在不同截点下的诊断性能进行图形化展示的方法。
+    其横轴为 1 − specificity（假阳性率），纵轴为 sensitivity（真阳性率）。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    当一个指标是连续数值时，不同截点会带来不同的敏感度与特异度。
+    ROC 曲线把所有可能截点的表现画在同一张图上，帮助我们观察“提高敏感度往往要牺牲部分特异度”的权衡关系。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某肿瘤标志物数值越高越提示肿瘤。
+    若把截点设得很低，敏感度高，但假阳性率也高；
+    若把截点设得很高，特异度升高，但可能漏诊更多患者。
+    把所有截点对应的点连起来，就是 ROC 曲线。
+  </div>
+
+  <h3>临床用途</h3>
+  <ul>
+    <li>评价单个试验的整体判别能力；</li>
+    <li>比较两个试验或两个模型；</li>
+    <li>辅助选择临床合适的截点。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Hajian-Tilaki K. ROC Curve Analysis for Medical Diagnostic Test Evaluation. 2013.</li>
+    <li>Florkowski CM. ROC Curves and Likelihood Ratios. Clin Biochem Rev. 2008.</li>
+  </ol>
+
+  <h2>12.4 AUC 的解释</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    AUC（area under the ROC curve）即 ROC 曲线下面积，是诊断试验整体区分能力的总结性指标。
+    AUC 越接近 1，说明区分能力越强；AUC = 0.5 表示与随机猜测相近。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    AUC 可以理解为：随机抽取一名真正患病者和一名真正无病者时，
+    该检测或模型给患病者更高风险分数的概率。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若某糖尿病视网膜病变筛查模型的 AUC = 0.91，
+    可以说它整体区分患病与无病个体的能力较强。
+    但这并不意味着每个截点下都适合临床使用。
+  </div>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    AUC 高，不等于临床上一定有用。真正应用时仍需要看具体截点下的敏感度、特异度、患病率以及临床代价。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Hajian-Tilaki K. 2013.</li>
+    <li>Nahm FS. Receiver operating characteristic curve: overview and practical use. 2022.</li>
+  </ol>
+
+  <h2>12.5 截点选择与临床应用</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    截点（cut-off, threshold）是将连续型检测值划分为阳性与阴性时所采用的界值。
+    不同截点会改变敏感度与特异度，因此截点选择本质上是漏诊与误诊之间的平衡。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    截点不是纯数学问题，而是统计与临床共同决定的问题。
+    筛查通常更怕漏诊，因此倾向于更高敏感度；
+    确诊通常更怕误诊，因此倾向于更高特异度。
+  </p>
+
+  <h3>常见统计方法</h3>
+  <div class="formula">
+    Youden 指数 J = Sensitivity + Specificity − 1
+  </div>
+  <p>
+    Youden 指数最大时的截点常被视为统计上较优截点。
+    但它默认敏感度和特异度同等重要，因此并不一定适合所有临床场景。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若 D-二聚体用于急诊筛查血栓，临床更担心漏掉真正血栓患者，
+    因此会倾向选择一个更高敏感度的截点，即使带来较多假阳性。
+  </div>
+
+  <h3>筛查研究中特别要注意</h3>
+  <ul>
+    <li>筛查常面对低患病率人群；</li>
+    <li>阳性结果通常需要进一步确诊；</li>
+    <li>不能只看 AUC，还要看具体工作点；</li>
+    <li>需要考虑后续检查成本、心理负担、过度诊断等问题。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Hoyer A, et al. Studies for the Evaluation of Diagnostic Tests. 2021.</li>
+    <li>Schisterman EF, et al. Youden Index and the optimal threshold for markers. 2008.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      诊断试验研究的核心是判断一个试验能否可靠地区分“有病”和“无病”。
+      敏感度和特异度描述试验本身的性能，阳性预测值和阴性预测值描述结果对临床判断的实际意义。
+    </p>
+    <p>
+      ROC 曲线和 AUC 适用于连续型指标的整体评价，但临床应用不能停留在 AUC 层面，
+      还必须结合具体截点、患病率以及漏诊和误诊的后果来综合判断。
+    </p>
+    <p>
+      对筛查研究而言，最重要的思想是：筛查阳性通常不等于确诊，统计指标的解释必须放回真实人群与临床流程中。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Šimundić AM. Measures of Diagnostic Accuracy: Basic Definitions. EJIFCC. 2009.</li>
+    <li>Dhamnetiya D, et al. How to Analyze the Diagnostic Performance of a New Test? Cureus. 2021.</li>
+    <li>Hajian-Tilaki K. ROC Curve Analysis for Medical Diagnostic Test Evaluation. 2013.</li>
+    <li>Florkowski CM. ROC Curves and Likelihood Ratios. Clin Biochem Rev. 2008.</li>
+    <li>Nahm FS. ROC curve: overview and practical use. 2022.</li>
+    <li>Deeks JJ. Systematic reviews of evaluations of diagnostic and screening tests. BMJ. 2001.</li>
+    <li>Cohen JF, et al. STARD 2015 guidelines. BMJ Open. 2016.</li>
+    <li>Power M, et al. Principles for high-quality, high-value testing. 2013.</li>
+    <li>Hoyer A, et al. Evaluation of Diagnostic Tests. 2021.</li>
+    <li>Schisterman EF, et al. Youden Index and optimal threshold. 2008.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>敏感度和特异度分别是从哪类人群出发定义的？</li>
+    <li>为什么高敏感度试验更适合用于初筛？</li>
+    <li>PPV 和 NPV 与敏感度、特异度的思维起点有什么不同？</li>
+    <li>为什么低患病率人群中 PPV 常常偏低？</li>
+    <li>ROC 曲线的横轴和纵轴分别是什么？</li>
+    <li>AUC = 0.5 和 AUC = 1.0 各意味着什么？</li>
+    <li>为什么 AUC 高并不等于筛查一定适用？</li>
+    <li>Youden 指数的公式是什么？</li>
+    <li>筛查研究中选择截点时通常优先考虑什么？</li>
+    <li>阅读诊断试验论文时，除了 AUC 还应关注哪些临床因素？</li>
+  </ol>
+
+</body>
+</html>
+
+13:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>13. 一致性与测量学方法</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>13. 一致性与测量学方法</h1>
+
+  <h2>13.1 一致性和相关性的区别</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    相关性（correlation）描述两个变量之间是否存在线性或单调关联；
+    一致性（agreement）关注的是两种测量方法、两个观察者或两次测量所得结果在数值上是否足够接近，
+    以及它们能否互相替代。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    相关性回答的是“一个高时另一个会不会也高”，
+    一致性回答的是“这两个值到底差多少，能不能当作差不多”。
+    因此，高相关并不等于高一致。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若某床旁血糖仪测得的结果总比实验室法高 1 mmol/L，
+    两者仍可能有很高相关性，因为它们会一起升高、一起降低。
+    但由于始终存在系统偏差，这两种方法并不真正一致。
+  </div>
+
+  <div class="tip">
+    <strong>初学者提醒：</strong>
+    方法比较研究若只报告皮尔逊相关系数，往往是不够的，
+    因为相关系数不直接反映两种方法的数值差异是否可接受。
+  </div>
+
+  <h3>与 ICC 的关系</h3>
+  <p>
+    ICC（组内相关系数）常用于一致性或可靠性研究，比普通相关系数更接近“一致性”的概念。
+    但 ICC 受样本异质性和模型设定影响，报告时必须说明具体采用哪一种 ICC。
+  </p>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Bland JM, Altman DG. Statistical methods for assessing agreement between two methods of clinical measurement. Lancet. 1986.</li>
+    <li>Liu J, et al. Correlation and agreement: overview and clarification. 2016.</li>
+  </ol>
+
+  <h2>13.2 Bland–Altman 分析</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    Bland–Altman 分析是比较两种连续型测量方法一致性的经典方法。
+    对每个对象，计算两方法测量值的均值和差值，并绘制“差值对均值图”。
+    同时估计平均差和 95% 一致性限。
+  </p>
+
+  <div class="formula">
+    平均差 = d̄
+  </div>
+  <div class="formula">
+    95% 一致性限 = d̄ ± 1.96 × SD(d)
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    Bland–Altman 分析真正想回答的是：
+    换一种测量方法后，结果通常会差多少？这种差异在临床上能不能接受？
+  </p>
+
+  <h3>结果解读要点</h3>
+  <ul>
+    <li>平均差是否接近 0：看是否存在系统偏倚；</li>
+    <li>一致性限是否够窄：看个体层面的差异是否可接受；</li>
+    <li>差值是否随均值变化：看是否存在比例偏倚。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    比较电子体温计与标准体温计。
+    若平均差为 0.2℃，说明电子体温计整体略偏高；
+    若 95% 一致性限为 -0.4℃ 到 0.8℃，
+    则还要进一步判断这个误差范围在临床上是否可接受。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Bland JM, Altman DG. 1986.</li>
+    <li>Gerke O. Reporting Standards for a Bland–Altman Agreement Analysis. 2020.</li>
+  </ol>
+
+  <h2>13.3 两种测量方法比较</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    当研究目的是比较两种测量方法、两台仪器、两个观察者或新旧检测流程时，
+    核心问题通常是它们是否足够接近，以至于在临床上可以互换或替代。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    比如比较新型无创血糖仪和实验室法，问题不是“一个高时另一个会不会也高”，
+    而是“它们测出来的具体值差多少，这个差值会不会影响诊断和治疗决策”。
+  </p>
+
+  <h3>常见分析思路</h3>
+  <ol>
+    <li>先画散点图，了解整体关系和异常值；</li>
+    <li>计算均值差，初步感受系统偏差；</li>
+    <li>做 Bland–Altman 分析，查看平均差和一致性限；</li>
+    <li>必要时结合 ICC 评价可靠性或观察者间一致性；</li>
+    <li>最重要的是结合临床可接受误差来解释结果。</li>
+  </ol>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    比较 MRI 与超声心动图测量左心室射血分数（LVEF）。
+    即使平均差很小，如果 95% 一致性限很宽，
+    在个体层面仍可能影响“是否达到治疗阈值”的判断，因此不能简单认为两种方法可互换。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Phatak AG, et al. Method Comparison (Agreement) Studies: Myths and Rationale. 2017.</li>
+    <li>Ranganathan P, et al. Common pitfalls in statistical analysis: Measures of agreement. 2017.</li>
+  </ol>
+
+  <h2>13.4 适用场景与常见误区</h2>
+
+  <h3>适用场景</h3>
+  <ul>
+    <li>新仪器与旧仪器比较；</li>
+    <li>不同观察者测量同一指标；</li>
+    <li>同一工具的重复测量可靠性评价；</li>
+    <li>连续型指标的临床替代性研究。</li>
+  </ul>
+
+  <h3>常见误区</h3>
+  <ul>
+    <li>误以为相关系数高就说明一致性好；</li>
+    <li>只看平均差接近 0，而忽略一致性限很宽；</li>
+    <li>只看 P 值，不看误差大小的临床意义；</li>
+    <li>不预先设定临床可接受误差范围；</li>
+    <li>对重复测量数据仍机械套用最简单的 Bland–Altman 方法；</li>
+    <li>报告 ICC 时不说明具体模型类型。</li>
+  </ul>
+
+  <div class="tip">
+    <strong>最实用的判断框架：</strong>
+    先问自己：研究目标到底是“看趋势是否一致”，还是“看数值能否互换”？
+    只要目标是方法替代或临床互换，就不要只满足于一个相关系数。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Ranganathan P, et al. 2017.</li>
+    <li>Koo TK, Li MY. A Guideline of Selecting and Reporting ICCs for Reliability Research. 2016.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      一致性与相关性不是同一个概念。相关性描述两个变量是否一起变化，
+      一致性则关心两种测量结果在数值上是否足够接近、能否互相替代。
+    </p>
+    <p>
+      对连续型测量方法的比较，Bland–Altman 分析是最经典的方法之一。
+      它通过平均差和 95% 一致性限，直接展示系统偏差和个体层面的误差范围。
+    </p>
+    <p>
+      对医学生来说，最重要的实践认识是：
+      评价新方法是否能替代旧方法，不是看相关性高不高，而是看两者差多少，以及这个差值临床上能否接受。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Bland JM, Altman DG. Statistical methods for assessing agreement between two methods of clinical measurement. Lancet. 1986.</li>
+    <li>Bland JM, Altman DG. Comparing methods of measurement. Lancet. 1995.</li>
+    <li>Liu J, et al. Correlation and agreement: overview and clarification. 2016.</li>
+    <li>Ranganathan P, et al. Common pitfalls in statistical analysis: Measures of agreement. 2017.</li>
+    <li>Gerke O. Reporting Standards for a Bland–Altman Agreement Analysis. 2020.</li>
+    <li>Doğan NÖ. Bland-Altman analysis: understanding correlation and agreement. 2018.</li>
+    <li>Koo TK, Li MY. Guideline of Selecting and Reporting ICCs. 2016.</li>
+    <li>Lee KM, et al. Pitfalls in Testing Reliability Using ICCs. 2012.</li>
+    <li>Phatak AG, et al. Method Comparison (Agreement) Studies: Myths and Rationale. 2017.</li>
+    <li>Qin S, et al. Assessing test–retest reliability of patient-reported outcomes. 2018.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>“相关性”与“一致性”最本质的区别是什么？</li>
+    <li>为什么两个方法的相关系数很高，仍不能说明它们可以互换？</li>
+    <li>Bland–Altman 图中横轴和纵轴分别是什么？</li>
+    <li>Bland–Altman 分析中的平均差反映什么？</li>
+    <li>95% 一致性限反映什么临床含义？</li>
+    <li>如果平均差接近 0，但一致性限很宽，应如何解释？</li>
+    <li>为什么方法比较研究不应只看 P 值？</li>
+    <li>ICC 在一致性/可靠性研究中有什么作用？</li>
+    <li>为什么报告 ICC 时必须说明模型类型？</li>
+    <li>若研究目标是判断新设备能否替代旧设备，你为什么会优先看 Bland–Altman 分析？</li>
+  </ol>
+
+</body>
+</html>
+
+14:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>14. 临床预测模型</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+      overflow-x: auto;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>14. 临床预测模型</h1>
+
+  <h2>14.1 预测模型和病因研究的区别</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    临床预测模型（clinical prediction model）是利用多个预测因子来估计个体当前患病概率
+    或未来发生某结局概率的统计工具，其核心关注点是预测准确性。
+    病因研究（etiologic research）则主要探索暴露与疾病之间的因果关系，
+    核心关注点是因果解释。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    病因研究回答“为什么会得病”，预测模型回答“谁更可能得病”。
+    因此，预测模型中纳入的变量不一定都具有因果意义，只要能提高预测性能，就可能有价值。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    建立卒中后 90 天不良结局预测模型时，可纳入年龄、NIHSS 评分、血糖等变量。
+    这里的目标不是证明某变量导致预后变差，而是尽量准确地识别高风险患者。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Steyerberg EW, et al. Assessing the performance of prediction models. 2010.</li>
+    <li>Efthimiou O, et al. Developing clinical prediction models: a step-by-step guide. 2024.</li>
+  </ol>
+
+  <h2>14.2 Logistic 回归预测模型</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    当结局为二分类时，最常用的临床预测模型之一是 Logistic 回归。
+    它通过对结局发生的对数优势（log-odds）建模，得到个体结局发生的预测概率。
+  </p>
+
+  <div class="formula">
+    log(p / (1 - p)) = β0 + β1X1 + β2X2 + ... + βkXk
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    Logistic 回归可以理解为一个“风险打分器”，把年龄、症状、化验指标等信息合并起来，
+    最后输出某位患者发生结局的概率。
+  </p>
+
+  <div class="tip">
+    <strong>初学者提醒：</strong>
+    用 Logistic 回归做预测时，重点不是某个变量的 P 值或 OR 是否显著，
+    而是整个模型的预测表现、稳定性与可推广性。
+  </div>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    建立肺炎患者住院期间转入 ICU 的风险模型，可纳入年龄、氧饱和度、呼吸频率、CRP 等变量，
+    最终输出个体 ICU 转入风险。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Efthimiou O, et al. 2024.</li>
+    <li>TRIPOD statement / explanation and elaboration. 2015.</li>
+  </ol>
+
+  <h2>14.3 列线图 Nomogram</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    Nomogram（列线图）是将回归模型可视化表达的一种工具，
+    可通过给各预测因子分配分值并求总分，再映射到结局风险概率，
+    以便于临床使用。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    你可以把列线图理解为“把回归公式画成一把尺子”。
+    医生不必手算复杂公式，只需在图上读取各变量对应分值并求和，即可得到预测风险。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    肿瘤术后复发风险模型可做成列线图，医生根据年龄、肿瘤大小、淋巴结状态等变量累计总分，
+    再读取 3 年复发概率。
+  </div>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    列线图只是模型的展示形式，不等于模型一定质量高。
+    真正重要的仍然是区分度、校准度和验证情况。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Gu HQ. Clinical prediction models: evaluation matters. 2020.</li>
+    <li>Efthimiou O, et al. 2024.</li>
+  </ol>
+
+  <h2>14.4 模型区分度与校准度</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    区分度（discrimination）指模型区分不同结局个体的能力，
+    对二分类结局常用 AUC / C-statistic 表示。
+    校准度（calibration）指模型预测概率与实际观察到结局频率之间的一致程度。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    区分度回答“模型会不会排序”，校准度回答“模型报出来的概率准不准”。
+    一个模型可能 AUC 很高，但如果系统性高估或低估风险，校准仍然不好。
+  </p>
+
+  <h3>常见评估方式</h3>
+  <ul>
+    <li>区分度：AUC / C-statistic</li>
+    <li>校准度：校准图、calibration intercept、calibration slope、O/E 比</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某脓毒症死亡风险模型 AUC 为 0.84，但对所有患者风险都高估约两倍。
+    这说明模型会排序，但预测概率并不准确，临床直接使用可能导致过度干预。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Steyerberg EW, et al. 2010.</li>
+    <li>Walsh CG, et al. Beyond Discrimination: calibration methods. 2017.</li>
+  </ol>
+
+  <h2>14.5 内部验证与外部验证</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    内部验证（internal validation）是在模型开发数据框架内评估模型稳定性和过拟合程度，
+    常用 bootstrap 或交叉验证。
+    外部验证（external validation）是在不同于开发数据的新数据中评估模型表现，
+    主要判断模型是否具有可推广性。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    内部验证是在问“模型是不是只会做原题”；
+    外部验证是在问“换一批新患者后，它还准不准”。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某医院开发胸痛患者 30 天 MACE 风险模型，在本院数据中表现很好，
+    但换到另一家医院后 AUC 降低且校准变差。
+    这说明模型可能存在可迁移性问题。
+  </div>
+
+  <div class="tip">
+    <strong>最重要的实践认识：</strong>
+    没有外部验证的预测模型，通常还不足以轻易推广到广泛临床使用。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Evaluation of clinical prediction models (part 3): external validation sample size. 2024.</li>
+    <li>Steyerberg EW, et al. 2010.</li>
+  </ol>
+
+  <h2>14.6 决策曲线分析 DCA</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    决策曲线分析（decision curve analysis, DCA）是评价预测模型临床实用性的方法。
+    它通过不同阈值概率下的净获益（net benefit），比较“使用模型”“全部干预”“全部不干预”等策略的价值。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    DCA 想回答的是：如果临床真的按照这个模型做决策，会不会比现有策略得到更多收益、减少更多伤害？
+    因此它比单纯 AUC 更贴近真实决策。
+  </p>
+
+  <h3>核心概念：阈值概率</h3>
+  <p>
+    阈值概率表示风险高到什么程度时，医生或患者愿意采取干预。
+    例如风险超过 10% 就建议活检，那么 10% 就是一个决策阈值。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    某前列腺癌风险模型的 DCA 显示，在 10%–25% 的阈值概率范围内，
+    使用模型的净获益高于“全部穿刺”和“全部不穿刺”。
+    这提示模型在该风险区间内可能具有临床价值。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Vickers AJ, Elkin EB. Decision curve analysis: a novel method for evaluating prediction models. 2006.</li>
+    <li>Vickers AJ, et al. Decision curve analysis to evaluate the clinical benefit of prediction models. 2021.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      临床预测模型的目标是利用多个信息估计个体风险，从而辅助临床决策。
+      它不同于病因研究，重点不在因果解释，而在预测表现和临床应用价值。
+    </p>
+    <p>
+      Logistic 回归是最常见的预测建模方法之一，Nomogram 只是其可视化表达形式。
+      真正决定模型质量的，是区分度、校准度、验证结果以及临床净获益。
+    </p>
+    <p>
+      对医学生而言，最重要的不是记住几个术语，而是建立“开发—评估—验证—应用”的完整框架。
+      只有经过充分验证、且在临床阈值范围内显示净获益的模型，才更可能真正有用。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Steyerberg EW, et al. Assessing the performance of prediction models. 2010.</li>
+    <li>Efthimiou O, et al. Developing clinical prediction models: a step-by-step guide. 2024.</li>
+    <li>Gu HQ. Clinical prediction models: evaluation matters. 2020.</li>
+    <li>Alba AC, et al. Discrimination and Calibration of Clinical Prediction Models. 2017.</li>
+    <li>Walsh CG, et al. Beyond Discrimination: calibration methods. 2017.</li>
+    <li>TRIPOD statement / explanation and elaboration. 2015.</li>
+    <li>TRIPOD+AI statement. 2024.</li>
+    <li>Evaluation of clinical prediction models (part 3): external validation. 2024.</li>
+    <li>Vickers AJ, Elkin EB. Decision curve analysis. 2006.</li>
+    <li>Vickers AJ, et al. Decision curve analysis to evaluate clinical benefit. 2021.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>预测模型研究和病因研究的核心目标分别是什么？</li>
+    <li>为什么一个变量即使没有明确因果意义，也可能被纳入预测模型？</li>
+    <li>Logistic 回归预测模型输出的核心临床信息是什么？</li>
+    <li>Nomogram 和预测模型本身是什么关系？</li>
+    <li>区分度和校准度分别回答什么问题？</li>
+    <li>为什么说“AUC 高”并不等于“模型一定好”？</li>
+    <li>内部验证和外部验证分别解决什么问题？</li>
+    <li>为什么没有外部验证的模型通常不能轻易推广？</li>
+    <li>DCA 中阈值概率是什么意思？</li>
+    <li>为什么 DCA 比单纯 AUC 更接近临床决策？</li>
+  </ol>
+
+</body>
+</html>
+
+
+15:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>15. 观察性研究与因果推断</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+      overflow-x: auto;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>15. 观察性研究与因果推断</h1>
+
+  <h2>15.1 观察性研究中的混杂与偏倚</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    观察性研究中，研究者不随机分配暴露或治疗，因此暴露组与非暴露组往往在基线特征上存在系统差异。
+    混杂是指某个变量同时与暴露和结局相关，且不位于暴露到结局的因果通路上，从而使观察到的关联偏离真实因果效应。
+    偏倚则是更广义的系统误差，还包括选择偏倚、信息偏倚等。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    在观察性研究里，谁接受治疗往往不是随机的。
+    因此两组患者本来就可能不一样，结局差异不一定都是治疗造成的。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    研究激素治疗是否降低某病住院风险时，病情更重的患者更可能被开激素。
+    如果直接比较住院率，就可能把“病情更重”误当成“药物效果差”。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Varga AN, et al. Dealing with confounding in observational studies. 2022.</li>
+    <li>Shi AX, et al. A comprehensive review and tutorial on confounding adjustment approaches. 2024.</li>
+  </ol>
+
+  <h2>15.2 倾向评分的基本思想</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    倾向评分（propensity score, PS）是给定一组已观测协变量后，个体接受处理的条件概率。
+  </p>
+
+  <div class="formula">
+    e(X) = P(Z = 1 | X)
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    倾向评分可以理解成“一个人有多大概率会接受治疗”。
+    它把很多基线特征压缩成一个数，用来帮助寻找更可比的处理组和对照组。
+  </p>
+
+  <div class="tip">
+    <strong>核心思想：</strong>
+    倾向评分平衡的是已观测基线协变量，而不是结局本身。
+    它不能自动消除未测混杂。
+  </div>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    研究疫苗是否降低住院风险时，可用年龄、慢病、既往住院史等变量估计每个人的接种倾向，
+    再用匹配、加权或分层使接种组与未接种组更可比。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Rosenbaum PR, Rubin DB. The central role of the propensity score. 1983.</li>
+    <li>Austin PC. Introduction to propensity score methods. 2011.</li>
+  </ol>
+
+  <h2>15.3 倾向评分匹配 PSM</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    倾向评分匹配（PSM）是根据个体的倾向评分，把处理组个体与倾向评分接近的对照组个体配对，
+    在匹配样本中比较结局的方法。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    PSM 的思路是：给每个治疗组患者找一个“本来也很可能接受治疗”的对照组患者来比较。
+    这样可减少“苹果和橘子”式比较。
+  </p>
+
+  <h3>方法学提醒</h3>
+  <ul>
+    <li>匹配后重点应看协变量平衡是否改善；</li>
+    <li>常用标准化差异（SMD）评价平衡，而不是只看 P 值；</li>
+    <li>有些个体会因找不到合适匹配对象而被剔除。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    比较腹腔镜与开腹手术时，可先用年龄、BMI、ASA 分级、肿瘤分期等估计 PS，
+    再做 1:1 匹配，使两组术前情况更接近后再比较术后并发症。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Austin PC. A tutorial and case study in propensity score analysis. 2011.</li>
+    <li>Lee B. Propensity score matching for comparative studies. 2024.</li>
+  </ol>
+
+  <h2>15.4 倾向评分加权 IPTW</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    IPTW（inverse probability of treatment weighting）通过对个体赋予与其接受当前处理概率倒数相关的权重，
+    构造一个加权伪总体，使处理组和对照组在已观测协变量上更平衡。
+  </p>
+
+  <div class="formula">
+    处理组权重 = 1 / e(X)
+  </div>
+  <div class="formula">
+    对照组权重 = 1 / (1 - e(X))
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    IPTW 不是删掉人，而是给不同患者不同权重，
+    让整个样本在加权后更像一个“处理分配接近随机”的虚拟总体。
+  </p>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    若倾向评分非常接近 0 或 1，会出现极端权重，导致估计不稳定。
+    因此常需检查重叠性，并考虑稳定权重或权重截断。
+  </div>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    研究抗凝药是否降低卒中风险时，IPTW 可在保留大部分样本的同时，
+    尽量校正治疗组与对照组在年龄、合并症和既往病史上的差异。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Austin PC. 2011.</li>
+    <li>Chang TH, et al. Propensity score methods for observational studies. 2022.</li>
+  </ol>
+
+  <h2>15.5 分层与协变量平衡</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    倾向评分分层是将个体按倾向评分分为若干层，在每一层内比较处理组和对照组结局，
+    再合并层内效应的方法。其目标也是改善协变量平衡。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    分层可以理解为：先把“接受治疗倾向差不多的人”归到同一档，再在这一档里比较治疗和未治疗。
+  </p>
+
+  <h3>协变量平衡是什么</h3>
+  <p>
+    无论是 PSM、IPTW 还是分层，最终目标都不是“算出倾向评分”本身，
+    而是让处理组与对照组在基线协变量分布上更接近，这就叫协变量平衡。
+  </p>
+
+  <h3>如何检查平衡</h3>
+  <ul>
+    <li>最常用标准化差异（SMD）；</li>
+    <li>经验上 |SMD| &lt; 0.1 常认为平衡较好；</li>
+    <li>也常配合 Love plot 展示平衡前后变化。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在比较两种降压药的真实世界研究中，研究者可先估计 PS，
+    再按五分位分层。如果各层内年龄、糖尿病史、肾功能等差异明显缩小，
+    说明分层起到了平衡作用。
+  </div>
+
+  <div class="tip">
+    <strong>最重要的一句：</strong>
+    倾向评分分析做完后，先看协变量平衡，再看最终效应估计。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Austin PC. 2011.</li>
+    <li>Valojerdi AE, et al. A brief guide to propensity score analysis. 2018.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      观察性研究的难点在于处理组和对照组通常并不天然可比，因此混杂和偏倚会影响因果解释。
+      倾向评分方法的核心任务，是在已观测协变量层面改善这种可比性。
+    </p>
+    <p>
+      PSM、IPTW 和分层虽然形式不同，但本质都在做同一件事：
+      让处理组和对照组在基线特征上更接近，从而使后续结局比较更接近公平比较。
+    </p>
+    <p>
+      对医学生来说，最重要的实践认识是：
+      倾向评分控制的是已测混杂；用了 PS 方法后应先检查协变量平衡；
+      若关键混杂未测或重叠很差，则因果结论仍需谨慎解释。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Rosenbaum PR, Rubin DB. The central role of the propensity score. 1983.</li>
+    <li>Austin PC. An introduction to propensity score methods. 2011.</li>
+    <li>Austin PC. A tutorial and case study in propensity score analysis. 2011.</li>
+    <li>Austin PC. Relative ability of different propensity score methods. 2009.</li>
+    <li>Varga AN, et al. Dealing with confounding in observational studies. 2022.</li>
+    <li>Chang TH, et al. Propensity score methods for observational studies. 2022.</li>
+    <li>Valojerdi AE, et al. A brief guide to propensity score analysis. 2018.</li>
+    <li>Yao XI, et al. Reporting and guidelines in propensity score analysis. 2017.</li>
+    <li>Shi AX, et al. Confounding adjustment approaches. 2024.</li>
+    <li>Lee B. Propensity score matching for comparative studies. 2024.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>为什么观察性研究中的“组间差异”不能直接解释为“因果效应”？</li>
+    <li>什么是混杂？它与一般偏倚是什么关系？</li>
+    <li>倾向评分的定义是什么？</li>
+    <li>倾向评分方法平衡的是结局，还是基线协变量？</li>
+    <li>为什么倾向评分不能自动解决未测混杂？</li>
+    <li>PSM 和 IPTW 在思路上最大的区别是什么？</li>
+    <li>为什么做完 PS 分析后应先看协变量平衡？</li>
+    <li>标准化差异（SMD）主要用来做什么？</li>
+    <li>什么叫重叠性（overlap）？为什么重要？</li>
+    <li>如果关键临床严重程度变量没有测量，你会如何评价研究的因果解释强度？</li>
+  </ol>
+
+</body>
+</html>
+
+16:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>16. 缺失值处理</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d7e6f7;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+      overflow-x: auto;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>16. 缺失值处理</h1>
+
+  <h2>16.1 缺失数据为什么是问题</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    缺失数据是指研究中本应观测到的变量值没有被记录下来。
+    缺失可以发生在基线协变量、暴露变量、结局变量或随访测量中。
+    它会导致信息损失，并可能引入系统偏倚。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    缺失值的问题不只是“样本少了一些”，更大的问题是：缺失往往不是随机发生的。
+    如果缺失更多地出现在某类患者身上，最后分析结果就可能被扭曲。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    糖尿病随访研究中，控制不好的患者更容易中途失访。
+    若最后只分析完成随访者，就可能高估治疗效果。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Sterne JAC, et al. Multiple imputation for missing data in epidemiological and clinical research. BMJ. 2009.</li>
+    <li>Carpenter JR, et al. Missing data: A statistical framework for practice. 2021.</li>
+  </ol>
+
+  <h2>16.2 完全病例分析</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    完全病例分析（complete-case analysis, CCA）是仅使用在分析所需全部变量上都无缺失的个体进行分析，
+    含有任何缺失值的个体都被排除。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    谁的数据不完整，就不分析谁。这种方法最简单，但不一定合理。
+  </p>
+
+  <h3>优点与局限</h3>
+  <ul>
+    <li>优点：简单、直接、容易操作；</li>
+    <li>局限：会丢失样本，降低效能；若缺失不是完全随机，可能产生偏倚。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若吸烟史缺失更多地发生在吸烟者本人身上，
+    完全病例分析后留下的样本就可能系统性低估吸烟比例。
+  </div>
+
+  <div class="tip">
+    <strong>提醒：</strong>
+    论文中若写“删除缺失病例后分析”，不能默认这样做没有问题，
+    还要看缺失比例和缺失原因。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Sterne JAC, et al. 2009.</li>
+    <li>Pedersen AB, et al. Missing data and multiple imputation in clinical epidemiological research. 2017.</li>
+  </ol>
+
+  <h2>16.3 缺失机制：MCAR / MAR / MNAR</h2>
+
+  <h3>严格定义</h3>
+  <ul>
+    <li><strong>MCAR</strong>：缺失与任何已观测或未观测数据都无关；</li>
+    <li><strong>MAR</strong>：给定已观测数据后，缺失不再依赖未观测值本身；</li>
+    <li><strong>MNAR</strong>：即使给定已观测数据，缺失仍依赖未观测值本身。</li>
+  </ul>
+
+  <h3>通俗解释</h3>
+  <p>
+    MCAR 像随机丢失；MAR 是“虽然不完全随机，但可由已知信息解释”；
+    MNAR 则是“缺失与真正没测到的值本身有关”，最难处理。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若老年患者更容易漏填问卷，而年龄是已知的，这更接近 MAR；
+    若抑郁越严重的人越不愿填写抑郁评分，而严重程度正是未观测结果本身，则更接近 MNAR。
+  </div>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    真实研究中严格的 MCAR 并不常见。
+    多重插补通常基于 MAR 作为工作假设。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Carpenter JR, et al. 2021.</li>
+    <li>Pedersen AB, et al. 2017.</li>
+  </ol>
+
+  <h2>16.4 多重插补 Multiple Imputation</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    多重插补（multiple imputation, MI）通过建立插补模型，为每个缺失值生成多个合理可能的替代值，
+    形成多个完整数据集；在每个数据集上重复相同分析后，再按 Rubin 规则合并结果。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    多重插补不是只填一个“最可能”的数，而是生成多个可能版本，
+    让最终分析结果能反映“我们其实并不确定真实缺失值是什么”。
+  </p>
+
+  <h3>为什么比单次填补更好</h3>
+  <ul>
+    <li>能更充分利用样本信息；</li>
+    <li>通常比完全病例分析偏倚更小；</li>
+    <li>能够把缺失引起的不确定性纳入标准误和置信区间。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    ICU 预后研究中，BMI、乳酸等基线指标有缺失。
+    研究者可用年龄、性别、严重度评分、其他实验室指标和结局变量做多重插补，
+    生成多个完整数据集后再做 Logistic 回归分析。
+  </div>
+
+  <div class="tip">
+    <strong>最重要的一句：</strong>
+    多重插补不是“把空白补满”，而是在合理假设下减少偏倚并保留不确定性。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Austin PC, van Buuren S. Missing Data in Clinical Research: A Tutorial on Multiple Imputation. 2021.</li>
+    <li>Li P, et al. Multiple Imputation: A Flexible Tool for Handling Missing Data. 2015.</li>
+  </ol>
+
+  <h2>16.5 缺失值分析的报告方式</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    高质量研究应透明报告缺失数据的规模、模式、处理方法、关键假设及其对结果的影响。
+    仅写“采用多重插补处理缺失值”通常是不够的。
+  </p>
+
+  <h3>至少应报告哪些内容</h3>
+  <ul>
+    <li>各关键变量缺失的人数和比例；</li>
+    <li>缺失的可能原因和模式；</li>
+    <li>采用的处理方法（如 CCA、MI）；</li>
+    <li>该方法依赖的假设（如 MAR）；</li>
+    <li>若做 MI，应报告插补模型、插补次数、软件和关键设置；</li>
+    <li>是否做了敏感性分析。</li>
+  </ul>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    一篇论文若明确写出 BMI 缺失 12%、CRP 缺失 8%、结局失访 6%，
+    并报告采用链式方程法生成 20 个插补数据集，且主要结果与完全病例分析方向一致，
+    这种报告就明显比只写“采用 MI 处理缺失值”更透明。
+  </div>
+
+  <h3>通俗解释</h3>
+  <p>
+    缺失值处理不只是“做了什么”，还要“说清楚怎么做的、为什么这样做、结果是否稳健”。
+  </p>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>STROBE Statement / EQUATOR guidance.</li>
+    <li>Karahalios A, et al. Reporting and handling of missing data in observational studies. 2012.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      缺失值处理之所以重要，是因为它不仅会减少样本量，更可能改变研究对象构成并引入偏倚。
+      对医学研究而言，缺失值绝不是一个可以轻描淡写带过的技术细节。
+    </p>
+    <p>
+      完全病例分析虽然简单，但往往代价较大。
+      MCAR、MAR、MNAR 框架帮助我们理解“数据是怎么缺的”，也决定了不同方法是否合理。
+      在 MAR 假设下，多重插补通常是较常用且较推荐的方法。
+    </p>
+    <p>
+      对医学生最重要的实践认识是：
+      缺失值可能带来偏倚；多重插补不是随便填数；评价论文时应同时关注缺失机制、处理方法、报告透明度和敏感性分析。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Sterne JAC, et al. Multiple imputation for missing data in epidemiological and clinical research. BMJ. 2009.</li>
+    <li>Austin PC, van Buuren S. Missing Data in Clinical Research: A Tutorial on Multiple Imputation. 2021.</li>
+    <li>Carpenter JR, et al. Missing data: A statistical framework for practice. 2021.</li>
+    <li>Pedersen AB, et al. Missing data and multiple imputation in clinical epidemiological research. 2017.</li>
+    <li>Li P, et al. Multiple Imputation: A Flexible Tool for Handling Missing Data. 2015.</li>
+    <li>Tan PT, et al. Controlled multiple imputation in randomized trials. 2021.</li>
+    <li>Mainzer R, et al. MI in observational studies that address causal questions. 2023.</li>
+    <li>Rezvan PH, et al. Review of reporting and implementation of MI. 2015.</li>
+    <li>STROBE Statement / EQUATOR Network.</li>
+    <li>Karahalios A, et al. Reporting and handling of missing data in observational studies. 2012.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>为什么说缺失值不仅会降低样本量，还可能带来偏倚？</li>
+    <li>完全病例分析的基本做法是什么？</li>
+    <li>MCAR、MAR、MNAR 三种缺失机制最核心的区别是什么？</li>
+    <li>为什么真实医学研究中严格的 MCAR 往往并不常见？</li>
+    <li>多重插补与“单次填补一个值”最本质的区别是什么？</li>
+    <li>多重插补通常依赖哪种缺失机制假设？</li>
+    <li>为什么说多重插补不是“随便填数”？</li>
+    <li>为什么不能只看作者写了“采用 MI”，还要看插补模型和敏感性分析？</li>
+    <li>若病情越重越容易失访，这更接近哪种缺失机制？</li>
+    <li>一篇论文在缺失值处理部分至少应报告哪些关键信息？</li>
+  </ol>
+
+</body>
+</html>
+
+
+17:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>17. 系统综述与 Meta 分析</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+      overflow-x: auto;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>17. 系统综述与 Meta 分析</h1>
+
+  <h2>17.1 系统综述的流程</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    系统综述是针对一个明确研究问题，采用预先设定、透明且可复现的方法，
+    系统检索、筛选、评价和综合现有研究证据的研究类型。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    系统综述不是“多读几篇文章再写总结”，而是按 заранее设定的规则，
+    尽量把相关研究都找出来，再用统一标准筛选和总结。
+  </p>
+
+  <h3>典型流程</h3>
+  <ol>
+    <li>提出明确问题（常用 PICO）；</li>
+    <li>制定方案（protocol）；</li>
+    <li>系统检索文献；</li>
+    <li>标题摘要筛选与全文筛选；</li>
+    <li>数据提取与偏倚风险评价；</li>
+    <li>定性综合，必要时做 Meta 分析。</li>
+  </ol>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若研究“他汀是否降低 2 型糖尿病患者心血管事件风险”，
+    系统综述作者需要先明确纳入哪些研究类型、哪些结局、如何检索和筛选，而不是只挑几篇熟悉的文章来总结。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Page MJ, et al. The PRISMA 2020 statement. BMJ. 2021.</li>
+    <li>Page MJ, et al. PRISMA 2020 explanation and elaboration. BMJ. 2021.</li>
+  </ol>
+
+  <h2>17.2 Meta 分析的基本思想</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    Meta 分析是在系统综述基础上，对多个独立研究的效应量进行统计合并的方法。
+    它通过加权整合多个研究结果，以获得更精确的总体效应估计，并探索研究间差异。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    Meta 分析可以理解为“按权重合并多项研究的结果”，
+    不是简单平均，而是让证据更充分、估计更稳定。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若有多项研究评估某降压药是否降低卒中风险，
+    Meta 分析可把各研究的 RR 或 OR 合并，得到整体效应估计。
+  </div>
+
+  <div class="tip">
+    <strong>提醒：</strong>
+    不是所有系统综述都适合做 Meta 分析。
+    若研究在人群、干预、结局或设计上差异过大，强行合并可能没有意义。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>McKenzie JE, et al. Meta-analysis and The Cochrane Collaboration. 2013.</li>
+    <li>Clephas PRD, et al. Interpretation of meta-analyses. 2022.</li>
+  </ol>
+
+  <h2>17.3 固定效应模型与随机效应模型</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    固定效应模型假定所有研究共享同一个真实效应，各研究差异仅来自抽样误差；
+    随机效应模型假定不同研究的真实效应本身可以不同，
+    研究差异既来自抽样误差，也来自研究间真实异质性。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    固定效应模型像是在说“大家都在估计同一个真值”；
+    随机效应模型则承认“不同研究可能本来就在测略有不同的真实效应”。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若多项研究来自不同国家、不同人群、不同剂量和不同随访时间，
+    随机效应模型通常更符合现实背景。
+  </div>
+
+  <div class="tip">
+    <strong>注意：</strong>
+    不能机械地只根据 I² 高低选择模型。
+    模型选择还应结合临床背景、研究可比性和分析目标。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Zhai C, et al. Fixed-effect and random-effects models in meta-analysis. 2023.</li>
+    <li>Martinez EC, et al. A comprehensive guide to conduct a systematic review and meta-analysis. 2025.</li>
+  </ol>
+
+  <h2>17.4 异质性分析</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    异质性指纳入研究结果之间存在超出随机误差的差异。
+    它可能来自临床异质性、人群差异、方法学差异或统计波动。
+  </p>
+
+  <h3>常用指标</h3>
+  <ul>
+    <li>Cochran’s Q 检验；</li>
+    <li>I² 统计量；</li>
+    <li>森林图中各研究效应方向和范围的直观观察。</li>
+  </ul>
+
+  <h3>通俗解释</h3>
+  <p>
+    异质性本质上是在问：这些研究到底是不是在讲同一件事。
+    如果差异过大，即使合并出了一个“总体结果”，临床解释也可能很困难。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若合并糖皮质激素治疗研究时 I² 很高，
+    需要进一步看是否把轻症和重症、不同剂量和不同给药时点的研究混在了一起。
+  </div>
+
+  <h3>异质性高时怎么办</h3>
+  <ul>
+    <li>检查数据提取是否正确；</li>
+    <li>分析研究设计和人群差异；</li>
+    <li>做亚组分析或敏感性分析；</li>
+    <li>必要时放弃定量合并，仅做定性总结。</li>
+  </ul>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Kontopantelis E, et al. A Re-Analysis of the Cochrane Library Data. 2013.</li>
+    <li>Schroll JB, et al. Dealing with substantial heterogeneity in Cochrane reviews. 2011.</li>
+  </ol>
+
+  <h2>17.5 漏斗图与发表偏倚</h2>
+
+  <h3>严格定义</h3>
+  <p>
+    发表偏倚是指研究结果是否被发表受到结果方向或显著性的影响，
+    使已发表研究不能代表全部已完成研究。
+    漏斗图是探索小研究效应和潜在发表偏倚的常用图形工具。
+  </p>
+
+  <h3>通俗解释</h3>
+  <p>
+    如果“阳性研究”更容易发表，而“阴性研究”更容易沉没，
+    那么 Meta 分析看到的整体效果就可能被高估。
+    漏斗图就是用来帮助发现这种线索的。
+  </p>
+
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    若很多小样本单中心研究都报告显著获益，而大样本研究效应较弱，
+    漏斗图可能出现偏斜，此时需要警惕发表偏倚或其他小研究效应。
+  </div>
+
+  <div class="tip">
+    <strong>非常重要：</strong>
+    漏斗图不对称并不自动等于发表偏倚。
+    它还可能由异质性、研究质量差异、异常值或随机波动引起。
+  </div>
+
+  <h3>参考文献</h3>
+  <ol class="ref">
+    <li>Shi L, et al. The trim-and-fill method for publication bias. 2019.</li>
+    <li>van Aert RCM, et al. Publication bias examined in meta-analyses. 2019.</li>
+  </ol>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      系统综述是一种规范化、可复现的证据整合流程；
+      Meta 分析则是在研究足够可比时，对多个研究结果进行统计合并。
+    </p>
+    <p>
+      对 Meta 分析结果的解读不能只看总体效应显不显著，
+      还必须同时考虑模型选择是否合理、异质性大小与来源，以及潜在发表偏倚。
+    </p>
+    <p>
+      对医学生来说，最重要的实践认识是：
+      Meta 分析并不是“天然最可信”，只有在综述流程透明、研究质量可接受、
+      异质性与偏倚得到认真处理时，合并结果才更值得信赖。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Page MJ, et al. The PRISMA 2020 statement. BMJ. 2021.</li>
+    <li>Page MJ, et al. PRISMA 2020 explanation and elaboration. BMJ. 2021.</li>
+    <li>McKenzie JE, et al. Meta-analysis and The Cochrane Collaboration. 2013.</li>
+    <li>Zhai C, et al. Fixed-effect and random-effects models in meta-analysis. 2023.</li>
+    <li>Clephas PRD, et al. Interpretation of meta-analyses. 2022.</li>
+    <li>Kontopantelis E, et al. A Re-Analysis of the Cochrane Library Data. 2013.</li>
+    <li>Schroll JB, et al. Dealing with substantial heterogeneity in Cochrane reviews. 2011.</li>
+    <li>Shi L, et al. The trim-and-fill method for publication bias. 2019.</li>
+    <li>van Aert RCM, et al. Publication bias examined in meta-analyses. 2019.</li>
+    <li>Mathur MB, et al. Assessing robustness to worst case publication bias. BMJ. 2024.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>系统综述与普通叙述性综述最本质的区别是什么？</li>
+    <li>为什么说不是所有系统综述都必须做 Meta 分析？</li>
+    <li>Meta 分析的合并为什么不是简单平均？</li>
+    <li>固定效应模型和随机效应模型对真实效应的假设有何不同？</li>
+    <li>为什么不能只根据 I² 高低机械决定用哪种模型？</li>
+    <li>异质性主要可从哪几类来源来理解？</li>
+    <li>当异质性较大时，作者可以采取哪些策略？</li>
+    <li>漏斗图主要用来探索什么问题？</li>
+    <li>为什么漏斗图不对称并不自动等于发表偏倚？</li>
+    <li>阅读一篇 Meta 分析时，除了看总体效应和 P 值，你还应重点检查什么？</li>
+  </ol>
+
+</body>
+</html>
+
+18:
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>18. 机器学习在医学统计中的应用</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.85;
+      color: #222;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #163a63;
+      margin-top: 1.4em;
+      margin-bottom: 0.6em;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 3px solid #163a63;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-left: 6px solid #3f6ea8;
+      padding-left: 12px;
+      background: #f5f9ff;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    h3 {
+      font-size: 1.18em;
+      color: #244d7c;
+    }
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+    .tip {
+      background: #fff9e8;
+      border-left: 5px solid #d9a300;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .example {
+      background: #f3fbf6;
+      border-left: 5px solid #3a8f5f;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .summary {
+      background: #f4f4f4;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    ul, ol {
+      padding-left: 1.5em;
+    }
+    li {
+      margin: 0.4em 0;
+    }
+    .formula {
+      background: #fbfbfb;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-family: "Times New Roman", serif;
+      overflow-x: auto;
+    }
+    .ref {
+      font-size: 0.96em;
+      color: #333;
+    }
+    .question-list li {
+      margin-bottom: 0.6em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>18. 机器学习在医学统计中的应用</h1>
+
+  <h2>18.1 机器学习与传统统计的关系</h2>
+  <h3>严格定义</h3>
+  <p>
+    传统统计更强调参数估计、假设检验、因果解释和不确定性量化；
+    机器学习更强调从数据中学习复杂模式，以优化预测性能或分类效果。
+    但二者并非对立，很多医学预测模型可同时被视为统计学习方法。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    传统统计常问“为什么”，机器学习常问“能不能更准地预测”。
+    在医学中，二者常常是互补关系，而不是替代关系。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    研究住院患者 30 天再入院风险时，
+    若重点是解释危险因素，可优先用回归模型；
+    若重点是提高预测准确率，可进一步考虑随机森林或 XGBoost。
+  </div>
+
+  <h2>18.2 决策树</h2>
+  <h3>严格定义</h3>
+  <p>
+    决策树通过递归划分数据，逐步选择变量和切分点，把样本分成更“纯”的子组，
+    最终形成树状结构用于分类或回归。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    决策树像一套“如果……那么……”的临床规则。
+    它很直观，但单棵树往往不够稳定。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    可用年龄、氧饱和度、血压等变量建立急诊高危患者识别树，
+    方便快速分层。
+  </div>
+
+  <h2>18.3 随机森林</h2>
+  <h3>严格定义</h3>
+  <p>
+    随机森林通过 bootstrap 抽样训练大量决策树，
+    并在每次分裂时只随机选择部分变量，最后综合多棵树的结果进行预测。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    它像“很多棵树一起投票”，通常比单棵树更稳定，也更不容易过拟合。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    用电子病历数据预测 AKI 风险时，随机森林可以同时利用大量实验室指标和生命体征。
+  </div>
+
+  <h2>18.4 XGBoost</h2>
+  <h3>严格定义</h3>
+  <p>
+    XGBoost 属于梯度提升树方法，按顺序逐步建立新树，
+    让后面的树专门拟合前面模型没学好的部分，从而不断提升整体性能。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    它不像随机森林那样“大家一起投票”，而是不断复盘前面的错误并补短板。
+    在表格型医学数据中常有很强表现。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在 ICU 死亡风险预测里，XGBoost 常被用于复杂表格数据建模，
+    但仍必须做外部验证和校准评估。
+  </div>
+
+  <h2>18.5 支持向量机 SVM</h2>
+  <h3>严格定义</h3>
+  <p>
+    SVM 的核心是寻找一个最大化分类间隔的分界超平面；
+    借助核函数，它还能处理非线性可分问题。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    SVM 试图找到一条“最安全”的分界线，把两类样本尽量分得更开。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在基因表达或小样本肿瘤分类任务中，SVM 常作为候选模型之一。
+  </div>
+
+  <h2>18.6 神经网络</h2>
+  <h3>严格定义</h3>
+  <p>
+    神经网络由多层节点和权重构成，能够学习输入到输出之间复杂的非线性映射；
+    多层网络通常称为深度学习。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    神经网络像一层层自动提取特征的系统，
+    尤其擅长处理图像、文本和其他非结构化数据。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在胸部 CT 或眼底图像识别中，卷积神经网络常用于检测病灶。
+  </div>
+
+  <h2>18.7 PCA 与降维</h2>
+  <h3>严格定义</h3>
+  <p>
+    PCA 通过线性组合原始变量，构造彼此正交的新变量（主成分），
+    用少数主成分尽可能保留原始数据的大部分变异信息。
+  </p>
+  <h3>通俗解释</h3>
+  <p>
+    PCA 的作用像“压缩信息”。
+    当变量很多而且彼此相关时，它可以把数据压缩成少数几个综合指标。
+  </p>
+  <div class="example">
+    <strong>医学 toy example：</strong>
+    在组学研究中，可用 PCA 先探索病例组与对照组的整体分离趋势，
+    或先做降维再进入后续分类模型。
+  </div>
+
+  <h2>18.8 医学场景中的优点、局限与误区</h2>
+  <h3>优点</h3>
+  <ul>
+    <li>能处理高维、复杂和非线性数据；</li>
+    <li>在图像、文本和复杂表格预测中常有优势；</li>
+    <li>有时可显著提高预测性能。</li>
+  </ul>
+
+  <h3>局限</h3>
+  <ul>
+    <li>容易过拟合；</li>
+    <li>可解释性常不足；</li>
+    <li>数据偏倚会被学习和复制；</li>
+    <li>高 AUROC 不等于模型已可临床应用。</li>
+  </ul>
+
+  <h3>常见误区</h3>
+  <ul>
+    <li>误以为机器学习一定比 Logistic 回归好；</li>
+    <li>误以为训练集或内部验证表现好就能临床落地；</li>
+    <li>误把变量重要性当作因果重要性；</li>
+    <li>误以为只看准确率或 AUROC 就足够。</li>
+  </ul>
+
+  <div class="tip">
+    <strong>最重要的一句：</strong>
+    在医学里，机器学习值不值得信，不取决于算法名字，而取决于数据质量、偏倚控制、外部验证、校准和临床效用。
+  </div>
+
+  <h2>本节小结</h2>
+  <div class="summary">
+    <p>
+      机器学习与传统统计并非对立，而是服务于不同目标的分析工具。
+      在医学中，机器学习尤其适合复杂预测任务和高维数据分析。
+    </p>
+    <p>
+      决策树、随机森林、XGBoost、SVM、神经网络和 PCA 各有适用场景，
+      没有哪一种方法天然“最先进就最好”。
+    </p>
+    <p>
+      对医学生来说，最重要的实践认识是：
+      不能只看模型名和性能数字，还必须关注外部验证、校准、偏倚、公平性与临床可实施性。
+    </p>
+  </div>
+
+  <h2>延伸阅读参考文献</h2>
+  <ol class="ref">
+    <li>Collins GS, et al. TRIPOD+AI statement. BMJ. 2024.</li>
+    <li>Moons KGM, et al. PROBAST+AI. BMJ. 2025.</li>
+    <li>Mateussi N, et al. Clinical Applications of Machine Learning. 2024.</li>
+    <li>An Q, et al. A Comprehensive Review on Machine Learning in Healthcare Industry. 2023.</li>
+    <li>Andrès E, et al. Machine Learning and Artificial Intelligence in Clinical Medicine. 2025.</li>
+    <li>Artificial intelligence, machine learning, and deep learning for clinical outcome prediction. 2021.</li>
+    <li>TRIPOD+AI reporting guideline page. EQUATOR Network.</li>
+  </ol>
+
+  <h2>自测小题</h2>
+  <ol class="question-list">
+    <li>机器学习与传统统计最核心的区别，更常体现在研究目标还是数学基础上？</li>
+    <li>为什么说机器学习不是“替代统计学”？</li>
+    <li>决策树的核心思想是什么？它最大的优点和典型缺点分别是什么？</li>
+    <li>随机森林相比单棵决策树，为什么通常更稳定？</li>
+    <li>XGBoost 与随机森林在建树思路上最大的区别是什么？</li>
+    <li>SVM 中“最大间隔”大致是什么意思？</li>
+    <li>神经网络为什么在医学影像任务中常见？</li>
+    <li>PCA 的主要目的是什么？它为什么不一定提高临床可解释性？</li>
+    <li>为什么说高 AUROC 并不等于机器学习模型已经可以临床应用？</li>
+    <li>在医学机器学习研究中，除了性能指标，你还应重点关注哪些方面？</li>
+  </ol>
+
+</body>
+</html>
